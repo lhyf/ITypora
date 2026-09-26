@@ -11,11 +11,16 @@ import { loadMathJax } from './mathjax';
 import { createPreserver } from './preserve.mjs';
 import { previewSpot, showInPreview, showInSource, sourceSpot } from './source-sync';
 import { SourceEditor } from './source-editor';
+import { closeZoomViewer, installZoom, zoomViewerOpen } from './zoom-viewer';
+import { exportPage } from './export';
+import { assetBase } from './asset-url';
 import type { Preferences, SettingsSnapshot } from './settings-types';
 
 type Theme = { id: string; name: string; css: string; warnings: string[] };
 type DocumentState = { path: string | null; content: string; dirty: boolean; recent: string[] };
 type FileEntry = { path: string; name: string };
+// package.json's version, set by vite.config.ts.
+declare const __APP_VERSION__: string;
 declare global {
   interface Window {
     desktop?: {
@@ -29,6 +34,8 @@ declare global {
       folder(): Promise<{ root: string; files: FileEntry[] } | null>;
       newDocument(): Promise<DocumentState | null>;
       save(saveAs?: boolean): Promise<DocumentState | null>;
+      exportTarget(kind: 'html' | 'pdf'): Promise<string | null>;
+      exportWrite(html: string): Promise<string>;
       close(): Promise<void>;
       update(content: string, dirty: boolean): void;
       importTheme(): Promise<Theme | null>;
@@ -95,6 +102,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 const $ = <T extends HTMLElement = HTMLElement>(selector: string) => document.querySelector<T>(selector)!;
 const desktop = window.desktop;
 installDocumentNavigation($('#editor'));
+installZoom($('#editor'), () => syncView());
 const source = new SourceEditor($('#source-editor'), () => { raw = source.value; sync(); });
 // The source caret lives in CodeMirror, not the document selection; menus follow it.
 source.cm.on('cursorActivity', () => syncView());
@@ -196,7 +204,7 @@ function currentFormatContext() {
 }
 
 function syncView() {
-  desktop?.view({ sidebar: !document.body.classList.contains('sidebar-hidden'), source: mode === 'source', focus: document.body.classList.contains('focus-mode'), typewriter: preferences.typewriter, statusbar: !document.body.classList.contains('status-hidden'), theme: localStorage.getItem('itypora-theme') || 'paper', editing: $('#preferences').hidden && !$<HTMLDialogElement>('#table-dialog').open && !loading, ...currentFormatContext() });
+  desktop?.view({ sidebar: !document.body.classList.contains('sidebar-hidden'), source: mode === 'source', focus: document.body.classList.contains('focus-mode'), typewriter: preferences.typewriter, statusbar: !document.body.classList.contains('status-hidden'), theme: localStorage.getItem('itypora-theme') || 'paper', editing: $('#preferences').hidden && !$<HTMLDialogElement>('#table-dialog').open && !zoomViewerOpen() && !loading, ...currentFormatContext() });
 }
 function flush() {
   if (mode === 'source') source.flush();
@@ -251,7 +259,9 @@ function sync() {
 }
 
 function decorate() {
-  const writing = document.querySelector<HTMLElement>(mode === 'wysiwyg' ? '.vditor-wysiwyg > .vditor-reset' : '.vditor-ir > .vditor-reset');
+  // In source mode the hidden editor keeps the mode it was rendered in.
+  const rendered = mode === 'source' && editorAlive ? (editor.vditor as unknown as { currentMode: string }).currentMode : mode;
+  const writing = document.querySelector<HTMLElement>(rendered === 'wysiwyg' ? '.vditor-wysiwyg > .vditor-reset' : '.vditor-ir > .vditor-reset');
   document.querySelectorAll('#write').forEach((element) => { if (element !== writing) element.removeAttribute('id'); });
   if (writing) { writing.id = 'write'; writing.setAttribute('aria-label', 'Markdown 编辑器'); }
 }
@@ -302,11 +312,13 @@ async function mountEditor() {
       toolbar: ['line', 'headings', 'bold', 'italic', 'strike', '|', 'list', 'ordered-list', 'check', 'indent', 'outdent', 'insert-before', 'insert-after', '|', 'quote', 'code', 'inline-code', 'link', 'table', '|', 'undo', 'redo'],
       toolbarConfig: { pin: true },
       counter: { enable: false }, resize: { enable: false },
+      // Double-clicked images open in src/zoom-viewer.ts instead.
+      image: { isPreview: false },
       placeholder: '',
       preview: {
         delay: 120,
         theme: { current: 'light', path: new URL('./vendor/vditor/dist/css/content-theme', document.baseURI).href },
-        markdown: { autoSpace: preferences.autoSpace, fixTermTypo: false, sanitize: true, gfmAutoLink: true, mark: true, sup: true, sub: true, toc: true, linkBase: desktop ? 'itypora-asset://document/' : '' },
+        markdown: { autoSpace: preferences.autoSpace, fixTermTypo: false, sanitize: true, gfmAutoLink: true, mark: true, sup: true, sub: true, toc: true, linkBase: desktop ? assetBase : '' },
         hljs: { enable: true, lineNumber: preferences.codeLineNumbers, renderMenu: renderCodeMenu }, math: { engine: mathEngine, inlineDigit: true }
       },
       input(value) {
@@ -378,7 +390,10 @@ function renderOutline() {
   if (!headings.length) { const p = document.createElement('p'); p.className = 'outline-empty'; p.textContent = mode === 'source' ? '切回编辑模式查看大纲' : '写下标题，大纲会出现在这里'; nav.append(p); }
   for (const heading of headings) {
     const button = document.createElement('button');
-    button.textContent = heading.textContent?.replace(/^#+\s*/, '') || '无标题';
+    // The heading's text without its Markdown (#, setext underline, **, `).
+    const text = heading.cloneNode(true) as HTMLElement;
+    text.querySelectorAll('.vditor-ir__marker, .vditor-ir__marker--hide, [data-type="heading-marker"]').forEach(marker => marker.remove());
+    button.textContent = text.textContent?.replace(/​/g, '').replace(/^#+\s*/, '').trim() || '无标题';
     button.style.paddingLeft = `${16 + (Number(heading.tagName.slice(1)) - 1) * 12}px`;
     button.addEventListener('click', () => heading.scrollIntoView({ behavior: 'smooth', block: 'start' })); nav.append(button);
   }
@@ -448,6 +463,35 @@ async function run(work: () => Promise<void>) {
     } catch (error) { toast(error instanceof Error ? error.message : String(error)); }
     if (pendingSettings) { const next = pendingSettings; pendingSettings = undefined; await applySettings(next); }
     if (pendingClose) { pendingClose = false; void action('close'); }
+  }
+}
+
+// Saves the rendered document as a standalone HTML page or a PDF (src/export.ts).
+async function exportDocument(kind: 'html' | 'pdf') {
+  if (!desktop && kind === 'pdf') { toast('请运行桌面版导出 PDF。'); return; }
+  if (!editorAlive) throw new Error('文档尚未渲染完成，暂时无法导出。');
+  const target = desktop ? await desktop.exportTarget(kind) : '';
+  if (target === null) return;
+  const title = currentPath ? basename(currentPath).replace(/\.[^.]+$/, '') : '未命名';
+  const view = $('#editor');
+  // Source mode hides the rendered document: lay it out unseen, with the latest text.
+  const hidden = view.hidden;
+  if (hidden) {
+    view.classList.add('itypora-exporting'); view.hidden = false;
+    if (raw !== sourceBase) { loading = true; try { renderDocument(); } finally { loading = false; } decorate(); sourceBase = raw; }
+    if (renderStale) { refreshRendering(editor); renderStale = false; }
+  }
+  try {
+    if (desktop) toast(kind === 'pdf' ? '正在导出 PDF…' : '正在导出 HTML…');
+    const html = await exportPage($('#write'), title);
+    if (!desktop) {
+      const url = URL.createObjectURL(new Blob([html], { type: 'text/html;charset=utf-8' }));
+      const anchor = document.createElement('a'); anchor.href = url; anchor.download = `${title}.html`; anchor.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+      toast('已导出 HTML 文件'); return;
+    }
+    toast(`已导出到 ${await desktop.exportWrite(html)}`);
+  } finally {
+    if (hidden) { view.hidden = true; view.classList.remove('itypora-exporting'); }
   }
 }
 
@@ -528,6 +572,8 @@ function cancelTableDialog() {
 $('#table-cancel').onclick = cancelTableDialog;
 $('#table-dialog').addEventListener('cancel', event => { event.preventDefault(); cancelTableDialog(); });
 $('#table-dialog').addEventListener('close', () => {
+  // The event is queued: when the dialog has already been opened again, it belongs to the previous one.
+  if ($<HTMLDialogElement>('#table-dialog').open) return;
   if (tableTarget) restoreTableTarget(tableTarget);
   tableTarget = null;
   syncView();
@@ -594,12 +640,17 @@ async function action(name: string) {
     else if (name === 'format:undo' || name === 'format:redo') document.execCommand(name.slice(7));
     return;
   }
+  if (zoomViewerOpen()) {
+    // Nothing to format while an enlarged picture covers the document.
+    if (name.startsWith('format:')) return;
+    closeZoomViewer();
+  }
   if (name === 'close' && (busy || loading)) { pendingClose = true; return; }
   if (!$('#preferences').hidden && name.startsWith('format:')) {
     if (name === 'format:undo' || name === 'format:redo') document.execCommand(name.slice(7));
     return;
   }
-  if (!$('#preferences').hidden && (['new', 'open', 'source', 'find', 'files', 'tree', 'outline'].includes(name) || name.startsWith('recent:'))) closePreferences();
+  if (!$('#preferences').hidden && (['new', 'open', 'source', 'find', 'files', 'tree', 'outline', 'export-html', 'export-pdf'].includes(name) || name.startsWith('recent:'))) closePreferences();
   if (name === 'format:table') { showTableDialog(); return; }
   if (name.startsWith('format:')) { format(name.slice(7)); return; }
   if (name.startsWith('theme:')) { await savePreferences({ theme: name.slice(6) }); return; }
@@ -614,7 +665,7 @@ async function action(name: string) {
   if (name === 'typewriter') { await savePreferences({ typewriter: !preferences.typewriter }); return; }
   if (name === 'statistics') { flush(); info('字数统计', `<dl class="statistics"><dt>词数</dt><dd>${wordCount()}</dd><dt>字符（不含空格）</dt><dd>${Array.from(raw.replace(/\s/g, '')).length}</dd><dt>预计阅读</dt><dd>${Math.max(1, Math.ceil(wordCount() / preferences.readingSpeed))} 分钟</dd><dt>行数</dt><dd>${raw ? raw.split('\n').length : 0}</dd></dl><p>词数按汉字和英文单词估算，不计代码块。</p>`); return; }
   if (name === 'help') { info('Markdown 快捷参考', '<p>输入标记后按空格即可即时排版。</p><pre># 一级标题\n## 二级标题\n**加粗**　*斜体*\n- 无序列表\n1. 有序列表\n- [ ] 任务列表\n> 引用\n[链接](https://example.com)</pre><p>Ctrl+/ 切换源码 · F8 专注模式 · F9 打字机模式</p>'); return; }
-  if (name === 'about') { info('Itypora 0.3.1', '<p>本地 Markdown 编辑器。</p><p>基于 Electron 和 Vditor 独立实现，支持导入 Typora CSS 主题。与 Typora 项目无隶属关系。</p>'); return; }
+  if (name === 'about') { info(`Itypora ${__APP_VERSION__}`, '<p>本地 Markdown 编辑器。</p><p>基于 Electron 和 Vditor 独立实现，支持导入 Typora CSS 主题。与 Typora 项目无隶属关系。</p>'); return; }
   await run(async () => {
     if (name === 'close') { desktop?.update(raw, dirty()); await desktop?.close(); }
     else if (name === 'source') await changeMode(mode === 'source' ? preferences.mode === 'wysiwyg' ? 'wysiwyg' : 'ir' : 'source');
@@ -637,6 +688,8 @@ async function action(name: string) {
       desktop.update(raw, dirty());
       const result = await desktop.save(name === 'save-as');
       if (result) { currentPath = result.path; saved = result.content; recovered = false; recent = result.recent; sync(); renderFiles(); toast('已保存到本地'); }
+    } else if (name === 'export-html' || name === 'export-pdf') {
+      await exportDocument(name === 'export-pdf' ? 'pdf' : 'html');
     } else if (name === 'import-theme') {
       if (!desktop) { toast('请运行桌面版导入带本地资源的 CSS 主题。'); return; }
       const theme = await desktop.importTheme();

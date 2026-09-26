@@ -2,6 +2,8 @@
 // into it (Lute would truncate highlighted HTML). Syntax is drawn by a read-only
 // overlay copy of the highlighted preview, or by CSS Highlights (color only)
 // whenever the preview is out of sync with the source.
+import { assetBase, assetPath } from './asset-url';
+
 let frame = 0;
 const highlightNames = new Set<string>();
 export function clearCodeHighlights() {
@@ -159,8 +161,10 @@ export function decorateFailedImages(root: HTMLElement) {
       const label = document.createElement('span'); label.className = 'itypora-image-source'; label.contentEditable = 'false'; wrapper.append(label);
     }
     let src = img.getAttribute('src') || '';
-    if (src.startsWith('itypora-asset://document/')) {
-      src = './' + src.slice('itypora-asset://document/'.length);
+    if (src.startsWith(assetBase)) {
+      src = assetPath(src);
+      // Lute drops the ./ of a path beside the document.
+      if (!/^(?:\.|[\\/]|[a-z]:|file:)/i.test(src)) src = './' + src;
       try { src = decodeURI(src); } catch { /* An invalid escape is shown verbatim. */ }
     }
     const title = img.title ? ` "${img.title.replace(/"/g, '\\"')}"` : '';

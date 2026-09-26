@@ -14,7 +14,7 @@ try {
   page.on('requestfailed', r => requests.push(r.url()));
   await expect(page.locator('#write')).toBeVisible();
   await app.evaluate(async ({BrowserWindow,dialog,clipboard,ClipboardItem}, file) => {
-    globalThis.renderClipboard = await Promise.all((await clipboard.read()).map(async item => new ClipboardItem(Object.fromEntries(await Promise.all(item.types.map(async type=>[type,await item.getType(type)]))))));
+    globalThis.renderClipboard = await Promise.all((await clipboard.read()).filter(item=>item.types.length).map(async item => new ClipboardItem(Object.fromEntries(await Promise.all(item.types.map(async type=>[type,await item.getType(type)]))))));
     BrowserWindow.getAllWindows()[0].setSize(1100,900);
     dialog.showOpenDialog=async()=>({canceled:false,filePaths:[file]});
     dialog.showMessageBox=async()=>({response:1});

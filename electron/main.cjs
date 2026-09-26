@@ -1,8 +1,9 @@
 const { app, BrowserWindow, dialog, ipcMain, Menu, protocol, shell } = require('electron');
 const fs = require('node:fs/promises');
+const crypto = require('node:crypto');
 const path = require('node:path');
-const { pathToFileURL } = require('node:url');
-const { atomicWrite, readDocument, listMarkdown, isWithin, MAX_DOCUMENT_BYTES } = require('./files.cjs');
+const { pathToFileURL, fileURLToPath } = require('node:url');
+const { atomicWrite, readDocument, listMarkdown, MAX_DOCUMENT_BYTES } = require('./files.cjs');
 const { createSettingsStore } = require('./settings.cjs');
 const { createMenu } = require('./menu.cjs');
 
@@ -37,6 +38,9 @@ let draftQueue = Promise.resolve();
 let lastDraft = '';
 let operation = Promise.resolve();
 let view = {};
+// The file chosen for the export in progress; the page itself comes from the renderer.
+let exportTarget = null;
+const MAX_EXPORT_BYTES = 512 * 1024 * 1024;
 const sendAction = (name) => window?.webContents.send('action', name);
 const rebuildMenu = () => Menu.setApplicationMenu(createMenu(sendAction, themes, recent, view));
 const entry = pathToFileURL(path.join(__dirname, '../dist/index.html')).href;
@@ -106,6 +110,89 @@ async function canReplace() {
   if (response === 0) return Boolean(await saveDocument());
   return true;
 }
+// Typora on Chinese Windows resolves generic sans-serif (e.g. Mermaid text,
+// CJK fallback of Latin-only stacks) to Microsoft YaHei; Chromium's own
+// default here is the Japanese Meiryo, with different glyphs and line height.
+function defaultFonts() {
+  const locale = app.getLocale();
+  const sansSerif = process.platform !== 'win32' || !/^zh/i.test(locale) ? undefined : /^zh-(TW|HK|MO|Hant)/i.test(locale) ? 'Microsoft JhengHei' : 'Microsoft YaHei';
+  return sansSerif && { defaultFontFamily: { sansSerif } };
+}
+// A local image of the current document, addressed as
+// itypora-asset://document/?/<path as written in the Markdown>: relative to the
+// document (also above its folder, ../assets/a.png) or absolute (E:\a.png,
+// file:///E:/a.png), as Typora shows them. The path rides in the query, where
+// the browser does not resolve "..". Null when it is not an image or too large.
+const assetPrefix = 'itypora-asset://document/?/';
+async function readAsset(href) {
+  const url = new URL(href);
+  if (url.protocol !== 'itypora-asset:' || url.hostname !== 'document' || !url.search.startsWith('?/')) return null;
+  let value = url.search.slice(2);
+  try { value = decodeURIComponent(value); } catch { /* A stray % is part of the name. */ }
+  const file = /^file:/i.test(value), folder = state.path && path.dirname(state.path);
+  if (!folder && !file && !path.isAbsolute(value)) return null;
+  const target = await fs.realpath(file ? fileURLToPath(value) : folder ? path.resolve(folder, value) : path.resolve(value));
+  const types = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.gif': 'image/gif', '.webp': 'image/webp', '.avif': 'image/avif' };
+  const type = types[path.extname(target).toLowerCase()];
+  const stat = await fs.stat(target);
+  if (!type || !stat.isFile() || stat.size > 20 * 1024 * 1024) return null;
+  return { type, data: await fs.readFile(target) };
+}
+// Embeds the document's images in an exported page, so it needs no files beside
+// it; one that cannot be read keeps its path, as written in the document.
+async function embedAssets(html) {
+  const pattern = /(\ssrc=")(itypora-asset:\/\/document\/[^"]*)"/g;
+  const values = new Map();
+  for (const [, , value] of html.matchAll(pattern)) {
+    if (values.has(value)) continue;
+    const href = value.replace(/&amp;/g, '&');
+    const asset = await readAsset(href).catch(() => null);
+    values.set(value, asset ? `data:${asset.type};base64,${asset.data.toString('base64')}` : value.startsWith(assetPrefix) ? value.slice(assetPrefix.length) : value);
+  }
+  return html.replace(pattern, (_match, attribute, value) => `${attribute}${values.get(value)}"`);
+}
+async function chooseExport(kind) {
+  if (kind !== 'html' && kind !== 'pdf') throw new Error('Unknown export format');
+  const name = state.path ? path.join(path.dirname(state.path), path.basename(state.path, path.extname(state.path))) : '未命名';
+  const result = await dialog.showSaveDialog(window, {
+    title: kind === 'pdf' ? '导出 PDF' : '导出 HTML', defaultPath: `${name}.${kind}`,
+    filters: [kind === 'pdf' ? { name: 'PDF', extensions: ['pdf'] } : { name: 'HTML', extensions: ['html', 'htm'] }]
+  });
+  exportTarget = result.canceled || !result.filePath ? null : { kind, file: result.filePath };
+  return exportTarget?.file || null;
+}
+// Prints the exported page in a hidden, offline window with scripts limited to
+// this process, like the document window's own rendering.
+async function printPdf(html) {
+  const file = path.join(app.getPath('temp'), `itypora-export-${crypto.randomUUID()}.html`);
+  await fs.writeFile(file, html, { encoding: 'utf8', mode: 0o600 });
+  const printer = new BrowserWindow({
+    show: false, width: 1000, height: 1400,
+    webPreferences: { partition: 'itypora-export', contextIsolation: true, nodeIntegration: false, sandbox: true, ...defaultFonts() }
+  });
+  try {
+    const contents = printer.webContents;
+    contents.session.webRequest.onBeforeRequest((details, callback) => callback({ cancel: !/^(file|data):/i.test(details.url) || (details.url.startsWith('file:') && details.url !== pathToFileURL(file).href) }));
+    contents.setWindowOpenHandler(() => ({ action: 'deny' }));
+    contents.on('will-navigate', (event) => event.preventDefault());
+    await printer.loadFile(file);
+    await contents.executeJavaScript('document.fonts.ready.then(() => new Promise(resolve => requestAnimationFrame(() => resolve(true))))', true);
+    return await contents.printToPDF({
+      pageSize: 'A4', printBackground: true, preferCSSPageSize: true, generateDocumentOutline: true, generateTaggedPDF: true
+    });
+  } finally {
+    printer.destroy();
+    await fs.rm(file, { force: true });
+  }
+}
+async function writeExport(html) {
+  const target = exportTarget;
+  exportTarget = null;
+  if (!target || typeof html !== 'string' || Buffer.byteLength(html) > MAX_EXPORT_BYTES) throw new Error('导出内容无效');
+  html = await embedAssets(html);
+  await atomicWrite(target.file, target.kind === 'pdf' ? await printPdf(html) : html);
+  return target.file;
+}
 function handle(channel, callback) {
   ipcMain.handle(channel, (event, ...args) => {
     if (!trusted(event)) throw new Error('Untrusted IPC sender');
@@ -125,25 +212,15 @@ app.whenReady().then(async () => {
   themes = (await settingsStore.initialize()).themes;
   protocol.handle('itypora-asset', async (request) => {
     try {
-      const url = new URL(request.url);
-      if (url.hostname !== 'document' || !state.path) return new Response('', { status: 404 });
-      const root = await fs.realpath(path.dirname(state.path));
-      const target = await fs.realpath(path.resolve(root, decodeURIComponent(url.pathname).replace(/^\/+/, '')));
-      const ext = path.extname(target).toLowerCase();
-      const types = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.gif': 'image/gif', '.webp': 'image/webp', '.avif': 'image/avif' };
-      if (!isWithin(root, target) || !types[ext] || (await fs.stat(target)).size > 20 * 1024 * 1024) return new Response('', { status: 403 });
-      return new Response(await fs.readFile(target), { headers: { 'Content-Type': types[ext], 'Cache-Control': 'no-store' } });
+      const asset = await readAsset(request.url);
+      if (!asset) return new Response('', { status: 403 });
+      return new Response(asset.data, { headers: { 'Content-Type': asset.type, 'Cache-Control': 'no-store' } });
     } catch { return new Response('', { status: 404 }); }
   });
-  // Typora on Chinese Windows resolves generic sans-serif (e.g. Mermaid text,
-  // CJK fallback of Latin-only stacks) to Microsoft YaHei; Chromium's own
-  // default here is the Japanese Meiryo, with different glyphs and line height.
-  const locale = app.getLocale();
-  const sansSerif = process.platform !== 'win32' || !/^zh/i.test(locale) ? undefined : /^zh-(TW|HK|MO|Hant)/i.test(locale) ? 'Microsoft JhengHei' : 'Microsoft YaHei';
   window = new BrowserWindow({
     width: 1000, height: 800, minWidth: 620, minHeight: 420,
     title: 'Itypora', backgroundColor: '#faf9f6', show: false,
-    webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true, ...(sansSerif && { defaultFontFamily: { sansSerif } }) }
+    webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true, ...defaultFonts() }
   });
   window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   window.webContents.on('will-navigate', (event) => event.preventDefault());
@@ -200,6 +277,8 @@ app.whenReady().then(async () => {
     return snapshot();
   });
   handle('save', saveDocument);
+  handle('export-target', chooseExport);
+  handle('export-write', writeExport);
   handle('close', async () => {
     if (!await canReplace()) return;
     state.dirty = false;

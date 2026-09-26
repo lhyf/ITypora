@@ -1,5 +1,7 @@
 # 验证记录
 
+开发过程中的验证日志，按时间顺序记录。文中提到的截图（`test-results/`）和打包目录（`release/`）是本地产物，不在仓库中；“本机 Typora / Matcha”指开发者机器上用于对照的 Typora 与第三方主题。
+
 ## 0.2.1 滚动布局修复
 
 - 隐藏居中正文及源码区域的系统滚动条，保留原编辑器滚动容器以支持滚轮、光标定位和打字机模式。
@@ -165,3 +167,46 @@ node tests/packaged.mjs
 - 顺带修复：保存或切换模式前先读取尚未处理的输入；关闭偏好设置后源码选区和滚动位置恢复；源码光标移动时同步菜单可用状态（表格、代码、任务、列表操作）；偏好设置“自定义 CSS”在文件读取完成前可以输入，读取结果会覆盖已输入内容，现改为读取完成前只读。
 - 新增 `tests/source-mode.test.cjs`（着色类名）；`tests/theme-rendering.mjs` 检查 Matcha 下源码模式标题字号、粗体、字体和行号；界面测试改用 CodeMirror 接口（`tests/source-editor.mjs`）。
 - 36 项单元测试和 12 组界面测试通过，`tests/preferences.mjs` 连续 12 次通过；`release/source-mode/win-unpacked/Itypora.exe` 通过 packaged 及 source-sync、save-preserve、code-editing、rendering、render-details、theme-rendering、formatting、desktop、table-dialog、sidebar。
+
+## 2026-09-26：双击放大查看图表和图片
+
+- 双击渲染后的图表（Mermaid 等代码块预览）或图片，打开窗口内查看器（`src/zoom-viewer.ts`）：适应窗口居中，滚轮以指针为中心缩放（10%–1000%），拖动平移，双击在整体和局部之间切换，工具栏和键盘（+/-、0、1、方向键、Esc）操作，窗口大小变化时重新适应。菜单命令会先关闭查看器，查看期间格式菜单不可用。
+- 图表以矢量副本显示：复制每个元素的计算样式，使主题中限定在 `#write` 下的规则在文档外仍然生效；元素 id 改名，箭头等标记指向副本自身。与文档中 100% 大小逐像素比对，8 种图表只有亚像素位置差异（时序图完全一致），Matcha 浅色、深色均已检查。放大时调整矢量图尺寸而非缩放位图，任何倍率都清晰。图片最多适应到原始大小。
+- 单击图表或图片仍显示 Markdown 源码，但延迟 0.25 秒：源码出现在图表上方会把图表推下去，第二次点击就落不到图表上。双击时不显示源码、不移动光标；较慢的双击（源码已经显示）同样打开查看器。
+- 修复：原先双击图片会打开 Vditor 自带的预览，其关闭按钮使用内联 `onclick`，被应用的内容安全策略拦截，预览无法关闭；现在图片也使用新的查看器。
+- 新增 `tests/zoom-viewer.mjs`（两种富文本模式，真实鼠标双击；样式一致、滚轮定点缩放、拖动、按键、按钮、窗口变化、Esc 后光标恢复、单击显示源码、慢速双击、菜单关闭、图片，文件不被修改）。
+- 36 项单元测试和 13 组界面测试通过；`release/zoom-viewer/win-unpacked/Itypora.exe` 通过 packaged、zoom-viewer、source-sync、rendering、render-details。
+
+## 2026-09-26：数学公式双击放大
+
+- 行内公式和独立公式也可以双击放大（查看器标题为“公式查看器”），单击仍显示 TeX 源码。放大的是整个 `mjx-container`：MathJax 4 会把较长的行内公式拆成几段 svg，中间是换行点，查看器里保持在同一行；隐藏的辅助 MathML 不显示。
+- 公式按页面缩放（CSS `zoom`）重新排版，任何倍率都清晰。100% 等于公式在文档中的实际大小：Matcha 等主题会缩小行内公式，查看器读取元素的实际缩放（`currentCSSZoom`）。
+- 修正：MathJax 字形通过 `<use>` 引用共享路径，颜色应继承 `<use>`；复制样式时跳过被引用的路径，否则字形变成纯黑，与分数线等其他部分颜色不一致。
+- `tests/zoom-viewer.mjs` 增加独立公式和三段行内公式：双击不显示源码、一行显示、无辅助 MathML、字形颜色与文档一致（截图取色）、100% 宽度与文档一致、单击仍显示源码。
+- 36 项单元测试和 13 组界面测试通过；`release/zoom-math/win-unpacked/Itypora.exe` 通过 packaged、zoom-viewer、rendering。
+
+## 2026-09-26：导出 HTML 和 PDF
+
+- 文件 → 导出 → HTML… / PDF…（`src/export.ts`，主进程 `electron/main.cjs`）。先选择保存位置，取消则不生成任何内容。
+- 导出内容取自编辑器中已渲染的文档，去掉编辑用的结构：Markdown 标记、隐藏的源码、代码块叠加层和复制按钮、换行标记；IR 模式的链接和引用式链接转为 `<a>`，目录、脚注和返回链接可跳转。和 Typora 的导出一样，不含 YAML Front Matter 和链接引用定义，脚注引用显示编号。页面带上编辑器的全部样式表和相同的外层结构，所以主题规则照常生效；与编辑器逐项比对标题、段落、提示块、表格、代码块、行内代码、目录、任务项的计算样式和宽度，完全一致。
+- HTML 为单个文件：主题字体已内嵌，文档目录内的本地图片由主进程读取并内嵌（沿用 `itypora-asset` 的路径检查），图表和公式是 SVG；页面不含脚本并声明 `script-src 'none'`。缺失的图片保留原路径，远程图片保留原地址。
+- PDF 在隐藏的离线窗口中打印（独立会话，拦截网络请求）：A4，页边距 16mm/18mm，整页（含页边距）使用主题底色，这与主题中“PDF 保留主题底色，页边距交给导出设置”的约定一致；标题生成书签，外部链接和文内跳转可点击；标题不与下文分离，图表、图片、代码块、表格、提示块尽量不跨页。Matcha 浅色与深色均已逐页检查。
+- 源码模式下导出：隐藏的渲染区在不可见状态下按当前文本重新排版后导出，界面保持源码模式。顺带修复：源码模式下 `#write` 固定指向 IR 面板，所见即所得模式的文档在源码模式中导出会得到空内容。
+- 示例文档导出 HTML 约 0.3 秒、1.2 MB；PDF 约 3.5 秒、28 页。
+- 新增 `tests/export.mjs`：两种富文本模式导出 HTML（结构、无编辑残留、图片内嵌、图表公式数量、复选框状态、链接/目录/脚注目标、与编辑器样式一致）和 PDF（A4、书签、外部与文内链接）；取消不写文件；源码模式导出未保存文本且不离开源码模式。
+- 顺带修复：插入表格对话框用 Esc/取消关闭后立即再次打开时，上一次关闭的 `close` 事件（异步派发）会在新对话框打开后才到达，清空新的插入位置，点“确定”没有反应。机器繁忙时 `tests/table-dialog.mjs` 几乎每次复现，旧版程序同样失败；现忽略对话框已重新打开时收到的 `close` 事件，连续 3 次通过。测试失败时先关闭对话框再退出，避免卡住。`tests/rendering.mjs` 备份剪贴板时跳过没有格式的条目。
+- 与 Typora 导出的 HTML 逐处对照后修正（`Markdown兼容性与显示测试`，Matcha 主题）：
+  - diff 代码块：Vditor 附带的 highlight.js 样式给增删行加了浅红/浅绿底色，Typora（CodeMirror 的 `cm-positive`/`cm-negative`）只有文字颜色。编辑器和导出都已去掉该底色，主题仍可自行设置。
+  - 脚注：与 Typora 相同，定义从正文移除，文末生成 `.footnotes-area`（分隔线 + “1. 内容 ↩”），引用和返回链接使用 Typora 的锚点名（`ref-footnote-1`、`dfref-footnote-1-1`）。多段脚注的后续段落跟在该条之后；Typora 自身把缩进的第二段解析成缩进代码块留在正文，这一解析差异不模仿。PDF 中脚注区不跨页。
+  - `<details>`：Markdown 中 `<details>`、正文、`</details>` 是三个独立的 HTML 块，编辑器按 Typora 编辑器的方式分别显示；导出时像浏览器读取整段 HTML 一样，把中间的块放回 `<details>` 内，可展开收起，`</details>` 源码不再显示。
+  - HTML 注释：导出为真正的注释，不显示；单独的闭合标签不显示。
+  - 所见即所得模式导出不再带编辑器左侧的 `</>`、`$$` 块标记。
+- 修改后 36 项单元测试及 export、code-editing、render-details、theme-rendering、rendering 通过（修改前的一轮完整测试 14 组全部通过，rendering 除剪贴板项）；`release/export/win-unpacked/Itypora.exe` 通过 packaged、export、table-dialog、code-editing、rendering。（此前一轮 rendering 的剪贴板项失败是本机剪贴板暂时不接受写入，在独立 Electron 进程中同样复现；剪贴板恢复后完整通过。）
+
+## 2026-09-26：上级目录与绝对路径图片
+
+- 问题：打开一个书稿文件夹（章节在 `chapters/`，图片在同级的 `assets/`），章节 `chapters/ch01-….md` 中的 `![图 1-1…](../assets/ch01/1-1-assembly.png)` 不显示，Typora 正常。原因有两层：图片地址 `itypora-asset://document/<路径>` 中的 `..` 被浏览器按网址规则吃掉（`document/../assets` 变成 `document/assets`）；主进程也只允许文档所在目录及子目录。绝对路径（`E:\a.png`、`file:///…`，Typora 默认插入图片即为绝对路径）Lute 不加前缀，被页面的 CSP 拦下，同样不显示。
+- 修改：图片地址改为 `itypora-asset://document/?/<Markdown 中原样的路径>`，路径放在查询部分，浏览器不再解析 `..`；主进程按当前文档位置解析相对路径，绝对路径和 `file:` 网址直接使用（`src/asset-url.ts`、`electron/main.cjs`）。与 Typora 一样不再限制目录，仍只读取 PNG/JPEG/GIF/WebP/AVIF、单张 20 MB 以内。HTML 中的 `<img>` 同样处理。保存时去掉地址前缀，路径保持原样；导出时嵌入这些图片，缺失的保留原路径。
+- 验证：真实书稿的第 1 章在即时渲染和所见即所得模式下 4 张图全部显示。新增 `tests/image-paths.mjs`：同级、上级目录（含中文和空格）、正斜杠/反斜杠绝对路径、`file:` 网址、HTML `<img>` 全部加载，缺失图片显示原路径；导出嵌入 6 张；在每张图片所在段落输入后保存，路径与原文一致。
+- 按用户操作复现：打包版“打开文件夹”选择书稿目录，逐个点击 `chapters/ch00`–`ch22` 共 23 章，85 张图全部显示（只读，未保存）。
+- 36 项单元测试和 15 组界面测试通过；`release/image-paths/win-unpacked/Itypora.exe` 通过 packaged、image-paths、export、code-editing、zoom-viewer。

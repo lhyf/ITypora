@@ -11,6 +11,8 @@ contextBridge.exposeInMainWorld('desktop', {
   folder: () => ipcRenderer.invoke('folder'),
   newDocument: () => ipcRenderer.invoke('new-document'),
   save: (saveAs) => ipcRenderer.invoke('save', Boolean(saveAs)),
+  exportTarget: (kind) => ipcRenderer.invoke('export-target', kind),
+  exportWrite: (html) => ipcRenderer.invoke('export-write', html),
   close: () => ipcRenderer.invoke('close'),
   update: (content, dirty) => ipcRenderer.send('document-update', { content, dirty }),
   importTheme: () => ipcRenderer.invoke('import-theme'),

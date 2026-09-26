@@ -87,6 +87,9 @@ button:disabled { opacity: .5; cursor: wait; }
 :where(#write) .hljs-string { color: var(--syn-string, #50a14f); }
 :where(#write) .hljs-number { color: var(--syn-number, #986801); }
 :where(#write) .hljs-comment { color: var(--syn-comment, #888); }
+/* Typora colors diff lines (CodeMirror's cm-positive/cm-negative) without
+   the background of the bundled highlight.js style; a theme may still set one. */
+:where(#write) .md-fences :is(.hljs-addition, .hljs-deletion) { background-color: transparent; }
 /* Document typography must not inherit disabled synthetic CJK bold/italic. */
 #write { font-synthesis: weight style; }
 #write :is(h4, h5, h6) { line-height: 1.5; margin: 1.4em 0 .6em; }
@@ -158,6 +161,12 @@ button:disabled { opacity: .5; cursor: wait; }
 #write .md-def-title::after { color: var(--md-char-color); content: '"'; right: 0; }
 #write .itypora-footnote-def-source { display: none; }
 #write .md-reverse-footnote-area a { text-decoration: underline; font-family: ui-monospace, sans-serif; cursor: pointer; }
+/* The footnote area at the end of an exported document (export.ts). */
+#write .footnotes-area { color: #888; margin-top: .714rem; padding-bottom: .143rem; white-space: normal; }
+#write .footnote-line { margin-top: .714em; font-size: .7em; white-space: pre-wrap; }
+#write .footnote-line a:not(.reversefootnote) { color: inherit; }
+#write .footnote-line .reversefootnote { font-family: ui-monospace, sans-serif; }
+#write .md-fn-count::after { content: "."; }
 #write [data-type="html-block"] > :is(.vditor-ir__preview, .vditor-wysiwyg__preview) { font: inherit; white-space: normal; }
 /* Typora's .md-rawblock: 1rem margins that the rendered content's margins
    collapse through; the collapsed source leaves the flow. A block that renders
@@ -224,6 +233,8 @@ button:disabled { opacity: .5; cursor: wait; }
 /* Hidden source mode stays laid out: CodeMirror measures and redraws its lines
    on window resizes, and loses track of them under display: none. */
 #source-editor[hidden] { display: block; position: absolute; inset: 0; visibility: hidden; pointer-events: none; }
+/* The rendered document laid out unseen for an export from source mode. */
+#editor.itypora-exporting { position: absolute; inset: 0; visibility: hidden; pointer-events: none; }
 #typora-source .CodeMirror { height: 100%; font-family: inherit; font-size: inherit; line-height: 1.75; color: inherit; background: transparent; }
 #typora-source .CodeMirror-lines { padding: 30px 30px 60px 60px; max-width: 800px; margin: 0 auto; }
 #source-editor.itypora-width #typora-source .CodeMirror-lines { max-width: var(--itypora-source-width) !important; }
@@ -318,6 +329,22 @@ dialog pre { font: 13px/2 var(--monospace, Consolas, monospace); white-space: pr
 .statistics { display: grid; grid-template-columns: 1fr auto; font-size: 14px; gap: 18px; }
 .statistics dd { margin: 0; font-variant-numeric: tabular-nums; }
 #toast { position: fixed; bottom: 44px; left: 50%; transform: translateX(-50%); max-width: 80vw; background: #303b32; color: #fff; padding: 10px 18px; font-size: 12px; line-height: 1.8; white-space: pre-line; border-radius: 4px; box-shadow: 0 4px 15px #0002; z-index: 100; }
+/* Enlarged diagram or image (src/zoom-viewer.ts), drawn on the document's own background. */
+.zoom-viewer { position: fixed; inset: 0; z-index: 100; background: var(--zoom-viewer-backdrop, var(--paper)); color: var(--ink); animation: zoom-viewer-in .12s ease-out; }
+.zoom-viewer__stage { position: absolute; inset: 0; overflow: hidden; cursor: grab; outline: none; touch-action: none; user-select: none; }
+.zoom-viewer__stage.dragging { cursor: grabbing; }
+.zoom-viewer__content { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.zoom-viewer__content > * { display: block; max-width: none; }
+.zoom-viewer__toolbar { position: absolute; top: 14px; right: 16px; display: flex; align-items: center; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 6px; background: var(--paper); box-shadow: 0 4px 18px #0000001f; font-size: 12px; }
+.zoom-viewer__toolbar button { height: 28px; min-width: 30px; padding: 0 6px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; color: var(--muted); }
+.zoom-viewer__toolbar button:hover { color: var(--ink); background: var(--hover); }
+.zoom-viewer__toolbar svg { width: 16px; height: 16px; }
+.zoom-viewer__level { min-width: 52px !important; font-variant-numeric: tabular-nums; }
+.zoom-viewer__separator { width: 1px; height: 18px; margin: 0 3px; background: var(--line); }
+.zoom-viewer__hint { position: absolute; left: 50%; bottom: 14px; margin: 0; transform: translateX(-50%); padding: 5px 12px; border-radius: 4px; background: var(--paper); color: var(--muted); font-size: 12px; white-space: nowrap; pointer-events: none; animation: zoom-viewer-hint 4s forwards; }
+@keyframes zoom-viewer-in { from { opacity: 0; } }
+@keyframes zoom-viewer-hint { 0%, 75% { opacity: 1; } 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .zoom-viewer { animation: none; } }
 .browser-menu { display: flex; padding: 4px 8px; border-bottom: 1px solid var(--line); font-size: 12px; }
 .browser-menu button { padding: 5px 9px; }
 :root[data-theme="sepia"] { --paper: #f8f3e7; --sidebar: #f0ebdf; --ink: #635b4e; --muted: #a49985; --line: #e9e2d3; --hover: #e8e0cf; --accent: #8c7751; --code: #f0e9d9; }

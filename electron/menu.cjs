@@ -12,6 +12,7 @@ function createMenu(action, themes, recent, view = {}) {
       command('new', '新建', 'CmdOrCtrl+N'), command('open', '打开…', 'CmdOrCtrl+O'), command('folder', '打开文件夹…'),
       { label: '打开最近文件', submenu: recent.length ? recent.map((file, index) => command(`recent:${index}`, file)) : [{ label: '暂无最近文件', enabled: false }] },
       separator, command('save', '保存', 'CmdOrCtrl+S'), command('save-as', '另存为…', 'CmdOrCtrl+Shift+S'),
+      { label: '导出', submenu: [command('export-html', 'HTML…'), command('export-pdf', 'PDF…')] },
       separator, command('preferences', '偏好设置…', 'CmdOrCtrl+,'), separator, command('close', '关闭', 'CmdOrCtrl+W')
     ] },
     { label: '编辑(&E)', submenu: [

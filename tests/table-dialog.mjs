@@ -100,6 +100,8 @@ try {
   console.error('Renderer errors:', errors); const page = await app.firstWindow(); console.error('Toast:', await page.locator('#toast').textContent());
   await page.screenshot({ path: 'test-results/table-dialog-failure.png' }); throw error;
 } finally {
+  // Closing the window while the dialog is open only cancels the dialog.
+  await (await app.firstWindow()).locator('#table-dialog').evaluate(dialog => dialog.close()).catch(() => {});
   await app.evaluate(({ dialog }) => { dialog.showMessageBox = async () => ({ response: 1 }); }).catch(() => {}); await app.close();
   const relative = path.relative(await fs.realpath(os.tmpdir()), await fs.realpath(temporary));
   if (!relative || relative.startsWith('..') || path.isAbsolute(relative)) throw Error('Unsafe cleanup'); await fs.rm(temporary, { recursive: true, force: true });

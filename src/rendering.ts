@@ -1,13 +1,12 @@
 import Vditor from 'vditor';
 import DOMPurify from 'dompurify';
 import { decorateCodeBlocks, decorateFailedImages } from './code-editing';
+import { assetBase, localAsset } from './asset-url';
 
 const previewSelector = '.vditor-ir__preview, .vditor-wysiwyg__preview';
 const scripts = new Map<string, Promise<void>>();
 // Separator before the definition copies; must match scripts/vditor-patch.mjs.
 const definitionCopies = 'ITyporaDefinitionCopies';
-// Vditor's link base for document-relative files (main.ts).
-const assetBase = 'itypora-asset://document/';
 // GitHub Octicons (MIT), as Typora draws them.
 const alertIcons: Record<string, string> = {
   NOTE: 'M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z',
@@ -212,7 +211,8 @@ export function installHtmlRendering(editor: Vditor, localImages: boolean) {
       // has no caret, and a stray marker would later capture Vditor's restore.
       if (name.startsWith('Md') && !input.includes('<wbr>')) html = html.replace(/<wbr>/g, '');
       const indented = ir && /data-type="code-block" class="vditor-ir__node"><pre/.test(html);
-      if (!indented && !html.includes('html-inline') && !html.includes('html-block') && !html.includes('**') && !html.includes('__') && !html.includes('vditor-task') && !html.includes('callout-info') && !html.includes('link-ref-defs-block') && !html.includes('[!') && !/https?:|@/.test(html)) return html;
+      const absoluteImage = localImages && /<img\b[^>]*\ssrc="(?:[a-z]:|[\\/](?!\/)|file:)/i.test(html);
+      if (!indented && !absoluteImage && !html.includes('html-inline') && !html.includes('html-block') && !html.includes('**') && !html.includes('__') && !html.includes('vditor-task') && !html.includes('callout-info') && !html.includes('link-ref-defs-block') && !html.includes('[!') && !/https?:|@/.test(html)) return html;
       const root = new DOMParser().parseFromString(html, 'text/html').body;
       const inert = root.ownerDocument;
       // An indented code block has no fence markers in Lute's IR DOM, so Lute
@@ -351,9 +351,11 @@ export function installHtmlRendering(editor: Vditor, localImages: boolean) {
         node.append(code, preview);
         const range = document.createRange(); range.setStartBefore(start); range.setEndAfter(end); range.deleteContents(); range.insertNode(node);
       }
-      if (localImages) root.querySelectorAll<HTMLImageElement>(`${previewSelector.split(', ').map(s => `${s} img`).join(', ')}`).forEach(img => {
-        const src = img.getAttribute('src');
-        if (src && !/^(?:[a-z][a-z\d+.-]*:|\/\/|\/|\\)/i.test(src)) img.src = new URL(src, assetBase).href;
+      // Lute's link base covers relative Markdown images; HTML images and
+      // absolute paths load through the same protocol.
+      if (localImages) root.querySelectorAll<HTMLImageElement>('img').forEach(img => {
+        const src = img.getAttribute('src') || '', local = localAsset(src);
+        if (local && local !== src) img.setAttribute('src', local);
       });
       decorateInlinePresentation(root);
       return root.innerHTML;
@@ -382,6 +384,13 @@ const diagramState = new WeakMap<Element, string>();
 // document (after editing in source mode) does not lay every diagram out again.
 const diagramCache = new Map<string, string>();
 let diagramQueue = Promise.resolve();
+// Resolves once no diagram is waiting to be rendered.
+export async function diagramsSettled() {
+  for (let queue = diagramQueue; ; queue = diagramQueue) {
+    await queue;
+    if (queue === diagramQueue) return;
+  }
+}
 function showDiagram(element: HTMLElement, svg: string) {
   element.innerHTML = svg;
   // Mermaid 11.16 renders "else" branch labels as sectionTitle; Typora's
