@@ -1,0 +1,6 @@
+# Store text with LF line endings whatever the contributor's Git settings.
+* text=auto
+*.png binary
+*.jpg binary
+*.ico binary
+*.icns binary

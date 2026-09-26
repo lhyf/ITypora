@@ -1,0 +1,47 @@
+name: 问题反馈 / Bug report
+description: 报告显示错误、崩溃或数据问题 / Report a rendering problem, crash or data issue
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: 问题描述 / What happened
+      description: 发生了什么，期望是什么？与 Typora 显示不一致时请附两边截图。 What happened and what did you expect? For differences from Typora, attach screenshots of both.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤 / Steps to reproduce
+      description: 最好附上能复现问题的最小 Markdown 片段。 A minimal Markdown snippet that reproduces it helps most.
+      placeholder: |
+        1. 打开 …
+        2. 切换到 …
+        3. 看到 …
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Itypora 版本 / Version
+      description: 帮助 → 关于 / Help → About
+      placeholder: 0.4.0
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: 系统 / Operating system
+      options: [Windows, macOS (Apple silicon), macOS (Intel), Linux]
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: 编辑模式 / Editing mode
+      options: [即时渲染 / Live preview, 所见即所得 / WYSIWYG, 源码 / Source, 不相关 / Not relevant]
+  - type: input
+    id: theme
+    attributes:
+      label: 主题 / Theme
+      placeholder: 素纸 / Matcha / …

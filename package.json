@@ -1,10 +1,26 @@
 {
   "name": "itypora",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "private": true,
   "description": "A local-first Markdown desktop editor",
+  "keywords": [
+    "markdown",
+    "editor",
+    "electron",
+    "wysiwyg",
+    "typora-theme",
+    "desktop"
+  ],
+  "homepage": "https://github.com/lhyf/ITypora#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lhyf/ITypora.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lhyf/ITypora/issues"
+  },
   "author": "Itypora contributors",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
@@ -26,6 +42,9 @@
     "test:sidebar": "npm run build && node tests/sidebar.mjs",
     "test:save": "npm run build && node tests/save-preserve.mjs",
     "test:source-sync": "npm run build && node tests/source-sync.mjs",
+    "test:zoom": "npm run build && node tests/zoom-viewer.mjs",
+    "test:export": "npm run build && node tests/export.mjs",
+    "test:images": "npm run build && node tests/image-paths.mjs",
     "pack": "npm run build && electron-builder --dir",
     "dist": "npm run build && electron-builder"
   },
@@ -55,6 +74,7 @@
   "build": {
     "appId": "io.itypora.editor",
     "productName": "Itypora",
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
     "directories": {
       "output": "release"
     },
@@ -63,26 +83,76 @@
       "electron/**/*",
       "package.json"
     ],
+    "extraResources": [
+      "LICENSE",
+      "THIRD_PARTY_NOTICES.md"
+    ],
     "asar": true,
+    "publish": null,
     "win": {
       "target": [
-        "nsis",
-        "portable"
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
       ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "${productName}-${version}-${os}-${arch}-setup.${ext}"
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}-${os}-${arch}-portable.${ext}"
     },
     "mac": {
       "target": [
-        "dmg",
-        "zip"
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
       ],
-      "category": "public.app-category.productivity"
+      "category": "public.app-category.productivity",
+      "identity": "-",
+      "hardenedRuntime": false
     },
     "linux": {
       "target": [
-        "AppImage",
-        "deb"
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "deb",
+          "arch": [
+            "x64"
+          ]
+        }
       ],
-      "category": "Office"
+      "category": "Office",
+      "synopsis": "Local-first Markdown editor",
+      "maintainer": "Itypora contributors <https://github.com/lhyf/ITypora>"
     }
   }
 }
