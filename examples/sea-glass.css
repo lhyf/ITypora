@@ -1,0 +1,14 @@
+/* Original sample theme for Itypora's Typora-style document CSS importer. */
+:root {
+  --bg-color: #f6faf9;
+  --text-color: #344a48;
+  --primary-color: #36796d;
+}
+body { background: var(--bg-color); color: var(--text-color); }
+#write { max-width: 840px; font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif; }
+#write h1, #write h2, #write h3 { color: #276356; }
+#write h1 { font-size: 2rem; letter-spacing: -.04em; }
+#write h2 { border-bottom: 1px solid #d7e7df; }
+#write blockquote { border-left: 3px solid #84afa2; color: #66877d; }
+#write a { color: #36796d; }
+#write th { background: #e7f0eb; }

@@ -1,0 +1,54 @@
+name: Desktop build
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - name: Desktop integration tests
+        if: runner.os != 'Linux'
+        run: node tests/desktop.mjs
+      - name: Desktop integration tests (Linux)
+        if: runner.os == 'Linux'
+        run: xvfb-run --auto-servernum node tests/desktop.mjs
+      - name: Preferences integration tests
+        if: runner.os != 'Linux'
+        run: node tests/preferences.mjs
+      - name: Preferences integration tests (Linux)
+        if: runner.os == 'Linux'
+        run: xvfb-run --auto-servernum node tests/preferences.mjs
+      - name: Sidebar integration tests
+        if: runner.os != 'Linux'
+        run: node tests/sidebar.mjs
+      - name: Sidebar integration tests (Linux)
+        if: runner.os == 'Linux'
+        run: xvfb-run --auto-servernum node tests/sidebar.mjs
+      - name: Package
+        run: npm run dist
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Itypora-${{ runner.os }}
+          path: |
+            release/*.exe
+            release/*.dmg
+            release/*.zip
+            release/*.AppImage
+            release/*.deb

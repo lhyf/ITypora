@@ -1,0 +1,326 @@
+@import url('../node_modules/vditor/dist/css/content-theme/light.css');
+:root { font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif; font-synthesis: none; --paper: #fff; --ink: #333; --sidebar: #f5f5f5; --muted: #888; --line: #e7e7e7; --accent: #58754e; --hover: #e9ece6; --code: #f5f5f5; color: var(--ink); background: var(--paper); color-scheme: light; }
+* { box-sizing: border-box; }
+body { margin: 0; overflow: hidden; }
+button, input, textarea, select { font: inherit; }
+button { color: inherit; cursor: pointer; border: 0; background: none; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+button:disabled { opacity: .5; cursor: wait; }
+.icon-button > svg, .sidebar svg { width: 16px; height: 16px; flex: 0 0 auto; }
+[hidden] { display: none !important; }
+#app { height: 100vh; display: flex; flex-direction: column; }
+.workspace { display: flex; flex: 1; min-height: 0; }
+.sidebar { position: relative; width: var(--sidebar-width, 240px); flex: 0 0 var(--sidebar-width, 240px); min-width: 0; background: var(--sidebar); border-right: 1px solid var(--line); display: flex; flex-direction: column; font-size: 13px; }
+#sidebar-resizer { position: absolute; top: 0; bottom: 0; right: -4px; width: 8px; cursor: col-resize; touch-action: none; z-index: 10; }
+#sidebar-resizer::after { content: ''; position: absolute; top: 0; bottom: 0; left: 3px; width: 2px; background: transparent; }
+#sidebar-resizer:hover::after, #sidebar-resizer:focus-visible::after, .resizing-sidebar #sidebar-resizer::after { background: var(--accent); }
+#sidebar-resizer:focus-visible { outline: none; }
+.resizing-sidebar, .resizing-sidebar * { cursor: col-resize !important; user-select: none !important; }
+.sidebar-tabs { display: flex; align-items: center; padding: 18px 16px 10px; gap: 24px; }
+.sidebar-tabs > button:not(.icon-button) { padding: 5px 0; color: var(--muted); }
+.sidebar-tabs .active { color: var(--ink) !important; border-bottom: 1px solid var(--ink); }
+.sidebar-tabs .icon-button { margin-left: auto; }
+.search-field { display: flex; align-items: center; gap: 8px; margin: 10px 16px; padding: 7px; color: var(--muted); border-bottom: 1px solid var(--line); }
+.search-field input { min-width: 0; width: 100%; border: 0; background: none; color: var(--ink); font-size: 12px; outline: none; }
+#file-pane { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+#file-list, #outline { overflow: auto; flex: 1; min-height: 0; min-width: 0; scrollbar-width: none; }
+#file-list::-webkit-scrollbar, #outline::-webkit-scrollbar { display: none; }
+.file-view { display: flex; gap: 10px; padding: 2px 20px; font-size: 11px; color: var(--muted); }
+.file-view .active { color: var(--ink); }
+.list-label, .tree-directory { color: var(--muted); font-size: 11px; padding: 12px 20px 8px; overflow-wrap: anywhere; }
+.file-item { display: flex; gap: 9px; align-items: center; width: 100%; padding: 10px 20px; text-align: left; font-size: 12px; }
+.file-item svg { width: 14px; height: 14px; opacity: .65; }
+.file-item span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.file-item.active, .file-item:hover { background: var(--hover); }
+.empty-files { padding: 28px 20px; color: var(--muted); font-size: 12px; }
+.empty-files button { padding: 0; color: var(--accent); }
+#outline button { display: block; width: 100%; text-align: left; line-height: 1.7; padding: 7px 18px; font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+#outline button:hover { color: var(--ink); background: var(--hover); }
+.outline-empty { padding: 15px 20px; font-size: 12px; color: var(--muted); }
+.folder-button { display: flex; align-items: center; gap: 8px; padding: 14px 18px; width: 100%; text-align: left; font-size: 12px; border-top: 1px solid var(--line); color: var(--muted); }
+.folder-button span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; background: var(--paper); position: relative; }
+.icon-button { width: 29px; height: 25px; padding: 6px; display: inline-flex; align-items: center; justify-content: center; color: var(--muted); }
+.icon-button:hover, .icon-button.active { color: var(--ink); background: var(--hover); }
+.editor-surface { flex: 1; min-height: 0; position: relative; background: var(--bg-color); color: var(--text-color); font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif; --bg-color: var(--paper); --text-color: var(--ink); --md-char-color: #aaa; --meta-content-color: #888; --primary-color: var(--accent); --monospace: 'Cascadia Code', Consolas, monospace; }
+#editor { height: 100%; }
+.vditor { border: 0; background: transparent; border-radius: 0; --panel-background-color: var(--bg-color); --textarea-background-color: var(--bg-color); --border-color: var(--line); --toolbar-background-color: var(--bg-color); --toolbar-icon-color: var(--muted); --toolbar-icon-hover-color: var(--accent); }
+.vditor-toolbar { display: none; }
+.vditor-content, .vditor-ir, .vditor-wysiwyg { background: transparent; }
+.vditor-reset { color: inherit; font-family: inherit; }
+.editor-surface .vditor, .editor-surface .vditor-content, .editor-surface .vditor-ir, .editor-surface .vditor-wysiwyg, #write { font-family: inherit; }
+#write { box-sizing: border-box; max-width: 860px; min-height: 100%; margin: 0 auto; padding: 48px 56px 120px; color: var(--text-color); font-size: 16px; line-height: 1.8; background: transparent; }
+#write h1 { font-size: 2em; line-height: 1.3; margin: 0 0 .8em; border: 0; }
+#write h2 { font-size: 1.5em; margin: 1.8em 0 .8em; border-bottom: 0; }
+/* Built-in themes underline H2; Typora's base layer (under imported themes) does not. */
+:root:not(.itypora-imported-theme) #write h2 { border-bottom: 1px solid var(--line); }
+#write h3 { font-size: 1.2em; margin: 1.5em 0 .7em; }
+/* Remove the editor's gutter-label layout as well as its H1–H6 text. Imported
+   themes can then use ::before as an inline heading decoration without offsets. */
+#write > :is(h1, h2, h3, h4, h5, h6)::before { content: none; float: none; margin: 0; padding: 0; font: inherit; color: inherit; }
+#write p { margin: .8em 0; }
+#write :is(a, .vditor-ir__link, .itypora-reference-link) { color: var(--primary-color); }
+#write .itypora-reference-link { cursor: pointer; text-decoration: underline; }
+#write .itypora-autolink-marker { display: none; }
+#write .itypora-autolink:focus-within .itypora-autolink-marker { display: inline; }
+#write blockquote { color: var(--muted); border-left: 3px solid var(--line); padding: 0 18px; background: transparent; margin: 1em 0; }
+#write code { font-family: var(--monospace); font-size: .88em; background: var(--code); border-radius: 3px; padding: .12em .35em; word-break: normal; }
+#write pre code { display: block; padding: 16px 20px; color: inherit; }
+#write table { width: 100%; display: table; font-size: .95em; border-collapse: collapse; margin: 1em 0; word-break: normal; }
+#write table th { font-weight: 600; background: var(--code); }
+#write th:not([align]) { text-align: left; }
+#write :is(th, td)[align="left"] { text-align: left; }
+#write :is(th, td)[align="center"] { text-align: center; }
+#write :is(th, td)[align="right"] { text-align: right; }
+#write table th, #write table td { padding: 8px 14px; border: 1px solid var(--line); white-space: pre-wrap; }
+/* Typora: table.md-table td { min-width: 32px }; header cells have none. */
+#write table td { min-width: 32px; }
+#write table tr { background: transparent; border: 0; }
+#write hr { display: block; border: 0; border-top: 1px solid var(--line); height: 1px; margin: 2em 0; background: none; }
+#write .vditor-task input[type="checkbox"] { font-size: inherit; }
+#write .vditor-task:where(:has(> input:checked, > p > input:checked)) > :where(.itypora-task-content, p) { color: var(--muted); text-decoration: line-through; }
+#write .vditor-ir__marker { color: var(--md-char-color); }
+/* Collapsed source markers are zero-size; a theme's code margin or border
+   (e.g. inline HTML's hidden <code> source) must not open a gap. */
+#editor #write .vditor-ir__node:not(.vditor-ir__node--expand) > .vditor-ir__marker { margin: 0; border: 0; }
+:where(#write) .hljs-keyword { color: var(--syn-keyword, #a626a4); }
+:where(#write) .hljs-string { color: var(--syn-string, #50a14f); }
+:where(#write) .hljs-number { color: var(--syn-number, #986801); }
+:where(#write) .hljs-comment { color: var(--syn-comment, #888); }
+/* Document typography must not inherit disabled synthetic CJK bold/italic. */
+#write { font-synthesis: weight style; }
+#write :is(h4, h5, h6) { line-height: 1.5; margin: 1.4em 0 .6em; }
+#write h4 { font-size: 1.1em; }
+#write h5 { font-size: 1em; }
+#write h6 { font-size: .9em; color: var(--muted); }
+#write [data-type="html-entity"] .vditor-ir__preview code, #write [data-type="html-entity"] .vditor-wysiwyg__preview code { font: inherit; background: none; padding: 0; }
+#write :is(.vditor-ir__preview, .vditor-wysiwyg__preview) img { max-width: 100%; height: auto; }
+/* Only standalone images are centered. Text with an inline image keeps its flow. */
+/* Typora: p > .md-image:only-child { display: inline-block; width: 100% }. */
+#write .itypora-image-only > :is([data-type="img"], [data-type="html-inline"]) { display: inline-block; width: 100%; }
+/* The collapsed source (zero-size markers and the space before a title) must
+   not open an empty line above the image. */
+#editor #write .itypora-image-only > .vditor-ir__node:not(.vditor-ir__node--expand, .itypora-image-error) { white-space: normal; }
+#editor #write .itypora-image-only > .vditor-ir__node:not(.vditor-ir__node--expand, .itypora-image-error) > .vditor-ir__marker { position: absolute; }
+/* Typora (base-control.css) gives images transparent side borders. */
+#write img { border-left: 2px solid transparent; border-right: 4px solid transparent; }
+#editor #write .itypora-image-only :is(.vditor-ir__preview, .vditor-wysiwyg__preview) { display: block; overflow: visible; }
+#write .itypora-image-only img { display: block; margin-inline: auto; }
+#write .md-toc { padding: 1em; margin: 1em 0; background: var(--code); border-radius: 6px; }
+#write .md-toc::before { content: '目录'; position: static; float: none; margin: 0; padding: 0; font: inherit; }
+/* Typora base.css TOC rules; decorateRendering() flattens the list like Typora's. */
+#write .md-toc-content { position: relative; margin-left: 0; }
+#write .md-toc-item { display: block; color: #4183c4; }
+#write .md-toc-item a { text-decoration: none; }
+#write .md-toc-inner { display: inline-block; cursor: pointer; }
+#write .md-toc-inner:hover { text-decoration: underline; }
+#write .md-toc-h1 .md-toc-inner { margin-left: 0; font-weight: 700; }
+#write .md-toc-h2 .md-toc-inner { margin-left: 2em; }
+#write .md-toc-h3 .md-toc-inner { margin-left: 3.5em; }
+#write .md-toc-h4 .md-toc-inner { margin-left: 5em; }
+#write .md-toc-h5 .md-toc-inner { margin-left: 6.5em; }
+#write .md-toc-h6 .md-toc-inner { margin-left: 8em; }
+#write a.md-toc-inner { font-size: inherit; font-style: inherit; font-weight: inherit; line-height: inherit; }
+#editor #write .md-meta-block > code { font: inherit; color: inherit; padding: 0; background: none; }
+#write .itypora-footnotes { border: 0; margin: 0; padding: 0; }
+#write .itypora-footnotes::before, #write [data-type="link-ref-defs-block"]::before { content: none; }
+#write .itypora-footnotes [data-type="footnotes-def"] > p:first-of-type { display: inline; margin-left: 0; }
+/* Typora's base layer (bootstrap.css, base.css, base-control.css) under the theme. */
+/* Typora (base-control.css) dims inline break syntax; its mark and <br>
+   source sit in two nested .6 opacity layers. */
+#write :is(.md-linebreak, .md-linebreak-mark) { font-family: var(--monospace); opacity: .6; color: inherit; white-space-collapse: preserve; }
+#write .md-linebreak { user-select: none; }
+#write .md-linebreak-mark::before { content: "↓"; }
+#editor #write .md-br:not(.vditor-ir__node--expand) > .vditor-ir__marker { display: inline; width: auto; height: auto; overflow: visible; font-family: var(--monospace); font-size: inherit; opacity: .36; color: inherit; background: none; box-shadow: none; }
+/* Typora's base kbd (Vditor's is an inline-block with a 10px line height). */
+#write kbd { display: inline; margin: 0 .1em; padding: .1em .6em; font: inherit; font-size: .8em; line-height: inherit; color: #242729; background: #fff; border: 1px solid #adb3b9; border-radius: 3px; box-shadow: 0 1px 0 rgba(12, 13, 14, .2), 0 0 0 2px #fff inset; white-space: nowrap; vertical-align: middle; }
+#write sub, #write sup { font-size: 75%; line-height: 0; position: relative; vertical-align: baseline; }
+#write sup { top: -.5em; }
+#write sub { bottom: -.25em; }
+#write sup.md-footnote { padding: 2px 4px; margin: 0 .2ch; background-color: rgba(238, 238, 238, .7); color: #555; border-radius: 4px; cursor: pointer; display: initial; }
+#write sup[data-type="footnotes-ref"] > .vditor-ir__marker--hide, #write .itypora-footnote-number, #write .vditor-ir__node--expand > .itypora-footnote-label { display: none; }
+#write .footnotes { opacity: .8; font-size: .9rem; margin-top: 1em; margin-bottom: 1em; }
+#write .md-def-name { font-weight: 700; font-size: 1em; display: inline-block; position: relative; padding-left: 2ch; padding-right: 2.5ch; text-align: center; }
+#write .md-def-name::before { font-weight: 400; content: "["; position: absolute; left: 0; color: #c7c5c5; }
+#write .md-def-footnote .md-def-name::before { content: "[^"; }
+#write .md-def-name::after { font-weight: 400; content: "] :"; position: absolute; right: 0; color: var(--md-char-color); }
+#write .md-def-split { display: inline-block; min-width: 1ch; }
+#write .md-def-split.md-auto-hide { min-width: 1px; }
+/* Link reference definitions (see decorateInlinePresentation()). */
+#write [data-type="link-ref-defs-block"]:not(.itypora-def-editing) > .itypora-def-source, #write .itypora-def-editing > .itypora-def-view { display: none; }
+#write .itypora-def-view { cursor: text; }
+#write .itypora-def-view > .md-def-link { display: block; }
+#write .md-def-url { text-decoration: underline; }
+#write .md-auto-disp { display: inline; }
+#write .md-auto-disp::after { content: "\200b"; display: inline-block; }
+#write .md-def-title { display: inline-block; position: relative; margin-left: 1ch; }
+#write .md-def-title::before { color: var(--md-char-color); content: '"'; left: 0; }
+#write .md-def-title::after { color: var(--md-char-color); content: '"'; right: 0; }
+#write .itypora-footnote-def-source { display: none; }
+#write .md-reverse-footnote-area a { text-decoration: underline; font-family: ui-monospace, sans-serif; cursor: pointer; }
+#write [data-type="html-block"] > :is(.vditor-ir__preview, .vditor-wysiwyg__preview) { font: inherit; white-space: normal; }
+/* Typora's .md-rawblock: 1rem margins that the rendered content's margins
+   collapse through; the collapsed source leaves the flow. A block that renders
+   nothing shows a source paragraph (decorateRendering()) with its own margins. */
+#editor #write [data-type="html-block"]:not(.vditor-ir__node--expand) { margin: 1rem 0; }
+#editor #write [data-type="html-block"].itypora-html-source:not(.vditor-ir__node--expand) { margin: 0; }
+#editor #write [data-type="html-block"]:not(.vditor-ir__node--expand) > .vditor-ir__marker { position: absolute; }
+#editor #write [data-type="html-block"] > :is(.vditor-ir__preview, .vditor-wysiwyg__preview) { overflow: visible; }
+#write .md-comment { color: #a27f03; opacity: .6; font-family: var(--monospace); }
+#write .md-tag { font-family: var(--monospace); opacity: .6; color: inherit; white-space-collapse: preserve; }
+/* Typora shows a character reference as plain text (.md-entity::before). */
+#editor #write [data-type="html-entity"] > :is(.vditor-ir__preview, .vditor-wysiwyg__preview) > code { font: inherit; color: inherit; background: none; border: 0; border-radius: 0; box-shadow: none; margin: 0; padding: 0; }
+#write [data-type="html-block"] > :is(.vditor-ir__preview, .vditor-wysiwyg__preview) :not(pre) > code { display: inline; }
+#write :is(.vditor-ir__preview, .vditor-wysiwyg__preview):has(> details, > table) { white-space: normal; }
+#write .md-fences { position: relative; background: var(--code); padding: 16px 20px; }
+#editor #write .md-fences > code { background: transparent; color: inherit; font-size: inherit; padding: 0; border: 0; box-shadow: none; }
+#write .language-mermaid { text-align: center; }
+/* A collapsed diagram shows only Typora's panel: no Vditor blank lines, and the
+   zero-size source markers leave the flow so they create no empty line box. */
+#editor #write .itypora-diagram-block:not(.vditor-ir__node--expand)::before, #editor #write .itypora-diagram-block:not(.vditor-ir__node--expand)::after { content: none; }
+#editor #write .itypora-diagram-block:not(.vditor-ir__node--expand) > .vditor-ir__marker { position: absolute; }
+/* The same for closed math blocks and front matter. */
+#editor #write .vditor-ir__node:is([data-type="math-block"], [data-type="yaml-front-matter"]):not(.vditor-ir__node--expand)::before,
+#editor #write .vditor-ir__node:is([data-type="math-block"], [data-type="yaml-front-matter"]):not(.vditor-ir__node--expand)::after { content: none; }
+#editor #write .vditor-ir__node[data-type="math-block"]:not(.vditor-ir__node--expand) > .vditor-ir__marker { position: absolute; }
+/* Typora: .md-math-block > .md-math-container > mjx-container[display]. */
+#editor #write .md-math-block > :is(.vditor-ir__preview, .vditor-wysiwyg__preview) { font-size: .95em; font-family: sans-serif; overflow-x: auto; overflow-y: hidden; }
+#write .md-math-block .language-math { margin: 0; }
+#write .md-math-block mjx-container[jax="SVG"][display="true"] { margin: 4px 0; }
+/* Typora: .md-inline-math-container mjx-container. */
+#write span.language-math > mjx-container { zoom: .95; }
+/* Typora's 10px panel margin collapses into the pre margin; this pre scrolls
+   (a new formatting context), so omit it rather than add it. */
+#write .md-diagram > .md-diagram-panel { margin: 0; padding: 8px 0; font-size: .95em; font-family: sans-serif; }
+/* Typora (base-control.css): an unfocused gantt chart spans 98vw, its panel
+   inset by 18px; the chart is rendered to that panel's width. The writing
+   element stands in for the viewport (decorateRendering()). */
+#editor #write > .itypora-gantt:not(.vditor-ir__node--expand) { width: calc(var(--itypora-write-width, 100vw) * .98); margin-left: calc(50% - var(--itypora-write-width, 100vw) * .49); }
+#editor #write > .itypora-gantt:not(.vditor-ir__node--expand) .md-diagram-panel { margin: 0 18px; }
+#write .language-mermaid svg { max-width: 100%; height: auto; }
+/* Mermaid measures HTML labels before placing the SVG in #write. Imported
+   paragraph margins must not change those measurements after insertion. */
+#editor #write .language-mermaid foreignObject :is(p, span) { margin: 0 !important; padding: 0 !important; font-size: inherit; }
+/* Typora base.css; global so Mermaid's off-document measurement sees it too. */
+.nodeLabel p, #editor #write .language-mermaid foreignObject .nodeLabel p { padding: 0 2px !important; }
+#write .diagram-error { white-space: pre-wrap; text-align: left; color: var(--ink); padding: 1em; border: 1px solid var(--line); }
+#write .callout { border-left-color: var(--alert-color); }
+#write .callout-info { display: block; color: var(--alert-color); font-weight: 600; }
+#write .itypora-callout-source { display: none; }
+/* Typora base.css alert label. */
+#write .md-alert-text { font-size: .9rem; font-weight: 700; }
+#write .md-alert-text svg { fill: currentColor; position: relative; top: .125em; margin-right: 1ch; overflow: visible; }
+#write .md-alert-text-container::after { content: attr(data-text); text-transform: capitalize; pointer-events: none; margin-right: 1ch; }
+#write [data-subtype="NOTE"] { --alert-color: #4786d1; }
+#write [data-subtype="TIP"] { --alert-color: #41855b; }
+#write [data-subtype="IMPORTANT"] { --alert-color: #9a6cce; }
+#write [data-subtype="WARNING"] { --alert-color: #b68529; }
+#write [data-subtype="CAUTION"] { --alert-color: #d26161; }
+:root[data-theme="night"] { --syn-keyword: #d2a8ff; --syn-string: #a5d6ff; --syn-number: #79c0ff; --syn-comment: #9da7b1; }
+/* Source mode: CodeMirror laid out and highlighted like Typora's source mode
+   (#typora-source, .cm-s-typora-default); themes' own rules for those override
+   these defaults. Only the current line shows its number, left of the text. */
+#source-editor, #typora-source { height: 100%; }
+/* Hidden source mode stays laid out: CodeMirror measures and redraws its lines
+   on window resizes, and loses track of them under display: none. */
+#source-editor[hidden] { display: block; position: absolute; inset: 0; visibility: hidden; pointer-events: none; }
+#typora-source .CodeMirror { height: 100%; font-family: inherit; font-size: inherit; line-height: 1.75; color: inherit; background: transparent; }
+#typora-source .CodeMirror-lines { padding: 30px 30px 60px 60px; max-width: 800px; margin: 0 auto; }
+#source-editor.itypora-width #typora-source .CodeMirror-lines { max-width: var(--itypora-source-width) !important; }
+#typora-source .CodeMirror-sizer { margin-left: 0 !important; }
+#typora-source .CodeMirror-gutters { left: initial !important; border-right: none; background: transparent; }
+#typora-source .CodeMirror-gutter { min-width: 4ch !important; }
+#typora-source .CodeMirror-gutter-wrapper { position: absolute !important; left: -6ch !important; min-width: 4ch !important; text-align: right; font-family: var(--monospace); font-size: .8rem; margin-top: .1rem; opacity: .6; color: var(--muted); }
+#typora-source .CodeMirror-linenumber { width: auto !important; padding-left: 6px; visibility: hidden; color: inherit; }
+#typora-source .CodeMirror-activeline .CodeMirror-linenumber { visibility: visible; }
+.cm-s-typora-default .CodeMirror-activeline-background { left: -60px; right: -30px; background: rgba(204, 204, 204, .2); }
+.CodeMirror.cm-s-typora-default div.CodeMirror-cursor { border-left: 3px solid var(--accent); }
+.cm-s-typora-default .CodeMirror-selected, .cm-s-typora-default.CodeMirror-focused .CodeMirror-selected { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+.cm-s-typora-default .cm-header, .cm-s-typora-default .cm-property { color: var(--accent); }
+/* A heading line and its tokens both carry the class; size one of them. */
+.cm-s-typora-default :is(.CodeMirror-line.cm-header1, .CodeMirror-line:not(.cm-header1) .cm-header1):not(.cm-atom):not(.cm-s-inner) { font-size: 2em; }
+.cm-s-typora-default :is(.CodeMirror-line.cm-header2, .CodeMirror-line:not(.cm-header2) .cm-header2):not(.cm-atom):not(.cm-s-inner) { font-size: 1.4em; }
+.cm-s-typora-default .cm-atom, .cm-s-typora-default .cm-number { color: #958486; }
+.cm-s-typora-default .cm-block-start, .cm-s-typora-default .cm-table-row, .cm-s-typora-default .cm-overlay { font-family: var(--monospace); }
+.cm-s-typora-default .cm-code, .cm-s-typora-default .cm-comment { color: #4a5a9f; font-family: var(--monospace); }
+.cm-s-typora-default .cm-tag { color: #a94442; }
+.cm-s-typora-default .cm-string { color: #7e86a9; }
+.cm-s-typora-default .cm-link { color: #c47a0f; text-decoration: underline; }
+.cm-s-typora-default .cm-variable-1, .cm-s-typora-default .cm-variable-2 { color: inherit; }
+.focus-mode #typora-source .CodeMirror-code > :not(.CodeMirror-activeline) { opacity: .28; }
+/* Keep Vditor's editable element as the scroll owner (caret/typewriter support),
+   but don't draw native scrollbars inside the centered writing column. */
+.editor-surface #write, .editor-surface #typora-source .CodeMirror-scroll { scrollbar-width: none !important; }
+.editor-surface #write::-webkit-scrollbar, .editor-surface #typora-source .CodeMirror-scroll::-webkit-scrollbar { display: none !important; }
+.editor-surface #write { overflow-x: hidden; overflow-y: auto; }
+/* Wide content scrolls locally instead of widening the whole document. */
+#editor #write table { display: block; max-width: 100%; overflow-x: auto; container-type: inline-size; }
+/* An empty caption sets the anonymous table's available width without forcing
+   equal cell widths. Intrinsic column sizing and local overflow stay native. */
+#editor #write table::before { content: ''; display: table-caption; width: 100cqw; }
+#editor #write pre, #editor #write .vditor-ir__preview, #editor #write .vditor-wysiwyg__preview { max-width: 100%; overflow-x: auto; }
+#editor #write table, #editor #write pre, #editor #write .vditor-ir__preview, #editor #write .vditor-wysiwyg__preview { scrollbar-width: thin; scrollbar-color: transparent transparent; }
+#editor #write table:hover, #editor #write pre:hover, #editor #write .vditor-ir__preview:hover, #editor #write .vditor-wysiwyg__preview:hover { scrollbar-color: var(--muted) transparent; }
+/* A code block has one native editable surface, with theme styling in both
+   focused and unfocused states. Its hidden preview supplies syntax colors only. */
+#editor #write .itypora-code-block { white-space: normal; margin: 0; padding: 0; }
+#editor #write .itypora-code-block::before, #editor #write .itypora-code-block::after { content: none; }
+#write .itypora-code-editor { margin: 1em 0; }
+#editor #write .itypora-code-block > :is(span[data-type], .vditor-ir__preview, .vditor-wysiwyg__preview) { display: none !important; }
+#editor #write .itypora-code-editor { display: block !important; width: auto; height: auto; visibility: visible; overflow-x: auto; overflow-y: hidden; white-space: pre-wrap; transition: none; }
+/* The collapsed IR marker reset has !important padding; the native source pre
+   is now a permanent editor, so remove that marker class in the adapter. */
+/* Typora wraps long code lines (CodeMirror-wrap) with 4px line padding. */
+#editor #write .itypora-code-editor > code { white-space: pre-wrap; overflow-wrap: break-word; word-break: normal; display: block; width: auto; height: auto; max-height: none !important; min-height: 1lh; margin: 0; padding: 0 4px; overflow: visible; outline: none; caret-color: var(--text-color); }
+#editor #write .itypora-code-editor > .itypora-code-overlay { position: absolute; margin: 0; pointer-events: none; user-select: none; }
+#editor #write .itypora-code-overlaid > code:not(.itypora-code-overlay) { color: transparent !important; -webkit-text-fill-color: transparent; }
+#editor #write .itypora-code-editor > .vditor-copy { position: absolute; top: 2.7em; left: 0; right: 0; height: 0; font-size: inherit; }
+#write .itypora-code-gutter { position: absolute; left: 1.25em; top: 2.7em; pointer-events: none; user-select: none; opacity: .45; font: inherit; white-space: pre; text-align: right; }
+#write .itypora-code-gutter::before { content: attr(data-lines); }
+#editor #write.itypora-code-line-numbers .itypora-code-editor > code { padding-left: calc(var(--itypora-code-gutter, 2ch) + 4px); }
+#editor #write .itypora-image-error { display: inline; font-family: var(--monospace); color: var(--primary-color); white-space: normal; overflow-wrap: anywhere; }
+#editor #write .itypora-image-error::before { content: '▧ '; }
+#editor #write .itypora-image-error > img { display: none; }
+#editor #write .itypora-image-error > .vditor-ir__marker { display: inline; width: auto; height: auto; visibility: visible; overflow: visible; padding: 0 !important; color: inherit; font: inherit; }
+.statusbar { display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; padding: 0 10px 0 6px; height: 26px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; background: var(--paper); }
+.statusbar > div { display: flex; align-items: center; gap: 3px; }
+.statusbar svg { width: 13px; height: 13px; }
+#save-status { margin-left: 6px; font-size: 10px; }
+#dirty-dot { font-size: 7px; padding: 0 3px; }
+#word-count { font-size: 11px; padding: 3px 6px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.sidebar-hidden .sidebar, .status-hidden .statusbar { display: none; }
+.focus-mode #write > :not(.active-paragraph) { opacity: .28; }
+.typewriter-mode #typora-source .CodeMirror-lines { padding-bottom: 45vh; }
+.findbar { display: flex; align-items: center; gap: 8px; padding: 7px 16px; border-bottom: 1px solid var(--line); font-size: 12px; background: var(--paper); }
+.findbar input { flex: 1; min-width: 80px; border: 0; background: transparent; color: var(--ink); padding: 4px; outline: none; }
+.findbar span { color: var(--muted); white-space: nowrap; }
+.findbar button { font-size: 16px; padding: 0 5px; }
+dialog { color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 6px; width: 540px; max-width: 90vw; max-height: 85vh; padding: 24px; box-shadow: 0 15px 60px #0003; }
+dialog::backdrop { background: #0004; }
+.dialog-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.dialog-header h2 { margin: 0; font-size: 19px; font-weight: 500; }
+.close-button { font-size: 24px; color: var(--muted); }
+dialog p { font-size: 12px; color: var(--muted); line-height: 1.8; }
+dialog pre { font: 13px/2 var(--monospace, Consolas, monospace); white-space: pre-wrap; }
+#table-dialog { width: 520px; padding: 24px 28px; border-radius: 4px; }
+#table-dialog h2 { margin: 0 0 32px; font-size: 21px; font-weight: 500; }
+.table-dimensions { display: flex; gap: 22px; }
+.table-dimensions label { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; font-size: 16px; }
+.table-dimensions input { width: 100%; min-width: 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 3px; background: color-mix(in srgb, var(--paper) 94%, var(--ink)); color: var(--ink); font-size: 17px; }
+.table-dimensions input:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+#table-dialog-hint { margin: 12px 0 22px; font-size: 12px; }
+.table-dialog-actions { display: flex; justify-content: flex-end; gap: 16px; }
+.table-dialog-actions button { min-width: 82px; padding: 10px 18px; border-radius: 3px; font-size: 15px; }
+#table-cancel:hover { background: var(--hover); }
+#table-confirm { background: var(--accent); color: var(--paper); }
+#table-confirm:hover { filter: brightness(.95); }
+.statistics { display: grid; grid-template-columns: 1fr auto; font-size: 14px; gap: 18px; }
+.statistics dd { margin: 0; font-variant-numeric: tabular-nums; }
+#toast { position: fixed; bottom: 44px; left: 50%; transform: translateX(-50%); max-width: 80vw; background: #303b32; color: #fff; padding: 10px 18px; font-size: 12px; line-height: 1.8; white-space: pre-line; border-radius: 4px; box-shadow: 0 4px 15px #0002; z-index: 100; }
+.browser-menu { display: flex; padding: 4px 8px; border-bottom: 1px solid var(--line); font-size: 12px; }
+.browser-menu button { padding: 5px 9px; }
+:root[data-theme="sepia"] { --paper: #f8f3e7; --sidebar: #f0ebdf; --ink: #635b4e; --muted: #a49985; --line: #e9e2d3; --hover: #e8e0cf; --accent: #8c7751; --code: #f0e9d9; }
+:root[data-theme="night"] { color-scheme: dark; --paper: #252b29; --sidebar: #202522; --ink: #c8d0c8; --muted: #869185; --line: #373e37; --hover: #354131; --accent: #98b788; --code: #202522; }
+@media (max-width: 720px) { #write { padding: 36px 28px 100px; } }
+@media print { .sidebar, .statusbar, .findbar, .browser-menu, .vditor-toolbar { display: none; } body, #app, .workspace, .editor-surface, #editor { height: auto; overflow: visible; } #write { max-width: none; } }
