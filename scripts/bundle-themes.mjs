@@ -11,8 +11,12 @@ if (!source) throw new Error('用法：npm run themes:bundle -- "主题目录"')
 const sourceFolder = await fs.realpath(source);
 const destination = fileURLToPath(new URL('../resources/themes/', import.meta.url));
 const entries = await fs.readdir(sourceFolder, { withFileTypes: true });
-const files = entries.filter(entry => entry.isFile() && /\.css$/i.test(entry.name) && !/\.user\.css$/i.test(entry.name) && !entry.name.startsWith('.')).sort((a, b) => a.name.localeCompare(b.name));
-if (!files.length) throw new Error('主题目录没有 CSS 主题。');
+const names = ['clarity-dark', 'clarity', 'github', 'lightmind-dark', 'lightmind', 'matcha-dark', 'matcha', 'morandigarden'];
+const files = names.map(name => {
+  const entry = entries.find(entry => entry.isFile() && entry.name === `${name}.css`);
+  if (!entry) throw new Error(`主题目录缺少 ${name}.css`);
+  return entry;
+});
 const compiled = [];
 for (const entry of files) {
   if (!/^[\w.-]+\.css$/.test(entry.name)) throw new Error(`主题文件名仅支持字母、数字、下划线和连字符：${entry.name}`);
@@ -26,6 +30,12 @@ for (const entry of files) {
 // Compile every theme before replacing the current manifest.
 await fs.mkdir(destination, { recursive: true });
 for (const theme of compiled) await fs.writeFile(path.join(destination, theme.fileName), theme.css);
+// Remove obsolete generated CSS so it cannot enter the installer as an extra resource.
+for (const entry of await fs.readdir(destination, { withFileTypes: true })) {
+  if (entry.isFile() && /\.css$/i.test(entry.name) && !compiled.some(theme => theme.fileName === entry.name)) {
+    await fs.rm(path.join(destination, entry.name));
+  }
+}
 async function copyNotices(folder, relative = '') {
   for (const entry of await fs.readdir(folder, { withFileTypes: true })) {
     if (entry.isSymbolicLink() || entry.name.startsWith('.') || entry.name === 'old-themes') continue;

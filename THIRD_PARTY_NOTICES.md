@@ -51,9 +51,12 @@ stay where they are written.
 `mode/markdown/markdown.js` (MIT, copyright Marijn Haverbeke and others),
 modified so source mode tokenizes Markdown the way Typora's source mode does.
 
-Imported themes and optional locally bundled themes are user-provided content
+Imported themes and the eight user-selected bundled themes are user-provided content
 and retain their own licenses; Itypora's MIT license does not apply to them.
 The local bundle embeds the supplied CSS/font/image resources and removes
 Typora-only export CDN directives. Available license notices accompany the
-bundle in `themes/licenses/`. Generated local bundles are excluded from the
-source repository. No Typora application binaries are included.
+bundle in `themes/licenses/`. The bundled themes are Clarity, Clarity Dark,
+GitHub, Light Mind, Light Mind Dark, Matcha, Matcha Dark and MorandiGarden;
+their compiled resources and notices are committed in `resources/themes/`
+so every platform installer contains the same offline assets.
+No Typora application binaries are included.

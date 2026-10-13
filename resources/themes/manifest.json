@@ -1,0 +1,36 @@
+{
+  "themes": [
+    {
+      "id": "builtin:clarity-dark",
+      "fileName": "clarity-dark.css"
+    },
+    {
+      "id": "builtin:clarity",
+      "fileName": "clarity.css"
+    },
+    {
+      "id": "builtin:github",
+      "fileName": "github.css"
+    },
+    {
+      "id": "builtin:lightmind-dark",
+      "fileName": "lightmind-dark.css"
+    },
+    {
+      "id": "builtin:lightmind",
+      "fileName": "lightmind.css"
+    },
+    {
+      "id": "builtin:matcha-dark",
+      "fileName": "matcha-dark.css"
+    },
+    {
+      "id": "builtin:matcha",
+      "fileName": "matcha.css"
+    },
+    {
+      "id": "builtin:morandigarden",
+      "fileName": "morandigarden.css"
+    }
+  ]
+}

@@ -4,3 +4,6 @@
 *.jpg binary
 *.ico binary
 *.icns binary
+# Bundled theme styles and font notices preserve their upstream formatting.
+resources/themes/*.css whitespace=-blank-at-eol,-space-before-tab
+resources/themes/licenses/** whitespace=-blank-at-eol

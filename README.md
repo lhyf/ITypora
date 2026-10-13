@@ -69,7 +69,7 @@ Itypora 基于 Electron 与 Vditor 独立实现，使用自己的界面和素材
 
 ## 主题
 
-Itypora 可以导入为 Typora 编写的 CSS 正文主题，也自带素纸、暖砂、夜读三个配色。通过 `npm run themes:bundle -- "主题目录"` 可将本地主题及字体、图片内嵌到自用安装包，安装或升级后直接在主题菜单中选择。新增主题不会覆盖已有主题文件或当前选择；用户删除的主题不会在重启后重新出现。
+Itypora 可以导入为 Typora 编写的 CSS 正文主题，内置素纸、暖砂、夜读，以及 Clarity / Clarity Dark、GitHub、Light Mind / Light Mind Dark、Matcha / Matcha Dark、MorandiGarden，共 11 个主题。随主题提供的字体和图片已内嵌，离线可用；本地和 GitHub 自动构建的安装包均包含这些主题，安装后可直接选择。新增主题不会覆盖已有主题文件或当前选择；用户删除的主题不会在重启后重新出现。使用 `npm run themes:bundle -- "主题目录"` 可从本机主题目录重新生成这 8 个附加主题。
 
 1. 保持主题原来的文件结构，例如 `my-theme.css`、`my-theme/fonts/`。
 2. 点击“主题 → 导入 CSS 主题…”，选择入口 `.css` 文件。本地 `@import`、同目录及子目录中的图片和字体会一起打包进主题副本，原文件不变。
@@ -77,7 +77,7 @@ Itypora 可以导入为 Typora 编写的 CSS 正文主题，也自带素纸、�
 4. “打开主题文件夹”可直接管理 Itypora 用户数据目录中的 `themes`，复制进去后“重新加载主题”即可。
 5. “自定义 CSS”编辑 `base.user.css`，对所有主题生效；也可以用 `主题名.user.css` 单独覆盖某个主题。加载顺序为主题 CSS → `base.user.css` → `主题名.user.css`；字号、字体、宽度的显式偏好设置优先于主题。
 
-兼容 `#write`、标准元素、正文 CSS 变量、字体和任务列表选择器，常用的背景、文字、侧栏和强调色变量会映射到应用界面。已用 Matcha 等主题与 Typora 逐项对照，但**不承诺所有主题与 Typora 像素级一致**。远程 `@import`、远程字体和图片会被跳过并提示；引用父目录、绝对路径和循环导入会报错；单个资源上限 16 MB，总计 20 MB。本地主题包不纳入源码仓库，主题和字体保留各自许可证。
+兼容 `#write`、标准元素、正文 CSS 变量、字体和任务列表选择器，常用的背景、文字、侧栏和强调色变量会映射到应用界面。已用 Matcha 等主题与 Typora 逐项对照，但**不承诺所有主题与 Typora 像素级一致**。远程 `@import`、远程字体和图片会被跳过并提示；引用父目录、绝对路径和循环导入会报错；单个资源上限 16 MB，总计 20 MB。内置主题资源位于 `resources/themes/`，主题和字体保留各自许可证。
 
 主题编写参考 Typora 的 [About Themes](https://support.typora.io/About-Themes/) 与 [Add Custom CSS](https://support.typora.io/Add-Custom-CSS/)。
 

@@ -67,16 +67,16 @@ The installers are not code-signed yet, so the system may block the first launch
 
 ## Themes
 
-Itypora imports CSS themes written for Typora and includes three colour schemes of its own.
+Itypora imports CSS themes written for Typora and includes 11 themes: three original colour schemes, Clarity / Clarity Dark, GitHub, Light Mind / Light Mind Dark, Matcha / Matcha Dark and MorandiGarden. Both local installers and GitHub Actions builds include these themes and their embedded font/image resources for offline use.
 
-Use `npm run themes:bundle -- "theme directory"` to embed local themes, fonts and images in a personal installer. They appear in the Theme menu after installation or upgrade. Existing files, selected themes and user deletions are preserved.
+Use `npm run themes:bundle -- "theme directory"` to regenerate the eight additional themes from a local source directory. They appear in the Theme menu after installation or upgrade. Existing files, selected themes and user deletions are preserved.
 
 1. Keep the theme's file layout, e.g. `my-theme.css` and `my-theme/fonts/`.
 2. Choose *主题 (Theme) → 导入 CSS 主题… (Import CSS theme…)* and pick the entry `.css` file. Local `@import`s, images and fonts in the same folder or below are packed into a copy of the theme; the original files are not changed.
 3. Switch themes from the Theme menu or in *Preferences → Appearance*.
 4. `base.user.css` (the *Custom CSS* option) applies to every theme, and `<theme>.user.css` overrides a single theme.
 
-Themes are checked against Typora (Matcha and others), but pixel-identical rendering for every theme is not guaranteed. Remote `@import`s, fonts and images are skipped with a warning. Resources are limited to 16 MB per file and 20 MB per theme. Local bundles are excluded from the source repository and retain the themes' and fonts' own licenses.
+Themes are checked against Typora (Matcha and others), but pixel-identical rendering for every theme is not guaranteed. Remote `@import`s, fonts and images are skipped with a warning. Resources are limited to 16 MB per file and 20 MB per theme. Bundled resources are committed in `resources/themes/` and retain the themes' and fonts' own licenses.
 
 ## Files and data
 

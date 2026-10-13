@@ -4,11 +4,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 
-const manifest = await fs.readFile('resources/themes/manifest.json', 'utf8').then(JSON.parse).catch(error => { if (error.code === 'ENOENT') return null; throw error; });
-if (!manifest?.themes.length) {
-  console.log('SKIP: generate a local bundle with npm run themes:bundle before this test');
-  process.exit(0);
-}
+const manifest = JSON.parse(await fs.readFile('resources/themes/manifest.json', 'utf8'));
 const temporary = await fs.mkdtemp(path.join(os.tmpdir(), 'itypora-bundled-themes-'));
 const documentPath = path.join(temporary, '主题验证.md');
 const original = '# 主题验证\n\n中文正文与 **粗体**、[链接](https://example.com)。\n\n- [x] 已完成任务\n- [ ] 待办任务\n\n> 引用正文\n\n```java\npublic class Example {}\n```\n\n| 列一 | 列二 |\n| --- | --- |\n| 内容 | 内容 |\n';

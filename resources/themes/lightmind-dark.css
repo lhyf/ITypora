@@ -1,0 +1,2826 @@
+/*
+    =========================================================
+    lightmind-dark.css  —  山林氛围的 Typora 暗色主题
+    正文  : 霞骛文楷 (LXGW WenKai)
+    代码  : JetBrains Mono
+    基调  : 暗夜森林 · 月光石青点缀 · 深海军蓝代码块
+    =========================================================
+*/
+
+/* ---------- 设计令牌 ---------- */
+.editor-surface {
+    /* 表面色 — 暗夜森林 */
+    --bg-page: #161d1a; /* 最深的森林夜色 — 页面外底 */
+    --bg-write: #1d2622; /* 略亮的写作区底色 */
+    --bg-soft: #232d28; /* 次表面（表格条纹、分隔线）*/
+    --bg-formula: #1f2823; /* 公式块底色 */
+    --bg-quote: #1d2722; /* 引用块底色 */
+    --bg-inline-code: #25342c; /* 行内代码 — 浅绿蒙层 */
+
+    /* 文字色 — 浅米色到柔和灰绿 */
+    --fg-main: #d4dccf; /* 主文字 — 浅米绿，护眼 */
+    --fg-muted: #9ba89e; /* 次要 / 元信息 */
+    --fg-faint: #6f7a72; /* 弱化前景色 */
+    --fg-heading: #e8ede1; /* 标题 — 比正文略亮 */
+
+    /* 强调色 — 在暗底上更明亮的绿色 */
+    --accent: #7fbe92; /* 中山林绿（暗底加亮版）*/
+    --accent-deep: #a8d4b6; /* 高对比 — 标题、加粗（暗底用更亮的）*/
+    --accent-soft: #5a7d68; /* 浅雾绿（暗底降饱和）*/
+    --accent-warm: #d8bd86; /* 暖金（阳光）— 略亮一档 */
+
+    /* 代码块底色（更深的海军蓝，与页面区分）*/
+    --code-bg: #14181f;
+    --code-bg-soft: #1c2128;
+    --code-fg: #c8cfd9;
+    --code-line: #3a4253;
+    --code-gutter: #6b7488;
+
+    /* 语法配色（One Dark 调色板，本身就适配深底）*/
+    --cm-keyword: #d55fde; /* public / void / if / return 关键字 */
+    --cm-type: #e5c07b; /* 类型名（如 DialogueManager） */
+    --cm-string: #89ca78;
+    --cm-number: #d19a66;
+    --cm-comment: #77b767;
+    --cm-variable: #ef596f;
+    --cm-def: #61afef; /* 函数名 */
+    --cm-property: #ef596f;
+    --cm-operator: #c8cfd9;
+    --cm-bracket: #7dba8b;
+    --cm-meta: #e5c07b;
+    --cm-tag: #d55fde;
+    --cm-attr: #2bbac5;
+
+    /* 效果（暗色阴影更强）*/
+    --radius-sm: 4px;
+    --radius: 8px;
+    --radius-lg: 12px;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
+    --shadow: 0 2px 10px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.25);
+    --shadow-lg: 0 6px 24px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.3);
+
+    /* 字体栈（不依赖外部资源，纯本地回退链）*/
+    --font-body:
+        "LXGW WenKai", "LXGW WenKai Screen", "霞鹜文楷", "Noto Serif CJK SC",
+        "Source Han Serif CN", "PingFang SC", "Microsoft YaHei", system-ui,
+        serif;
+    --font-mono:
+        "JetBrains Mono", "JetBrainsMono NF", "Fira Code", "Cascadia Code",
+        "SF Mono", Consolas, "Courier New", "LXGW WenKai", "LXGW WenKai Screen",
+        "霞鹜文楷", "Noto Serif CJK SC", "PingFang SC", monospace;
+    --font-heading:
+        "LXGW WenKai", "LXGW WenKai Screen", "霞鹜文楷", "Noto Serif CJK SC",
+        "PingFang SC", system-ui, serif;
+}
+
+/* ---------- 页面框架 ---------- */
+.editor-surface {
+    font-size: 18px;
+}
+
+.editor-surface,
+.editor-surface {
+    background: var(--bg-page);
+    color: var(--fg-main);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.editor-surface {
+    font-variant-ligatures: common-ligatures;
+}
+
+.editor-surface #write {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 48px 56px 96px 56px;
+    font-size: 18px;
+    line-height: 1.78;
+    color: var(--fg-main);
+    background: var(--bg-write);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    margin-top: 24px;
+    margin-bottom: 24px;
+}
+
+.editor-surface #write > *:first-child {
+    margin-top: 0;
+}
+
+/* 侧边栏 / 文件树（米色背景）*/
+.editor-surface #typora-sidebar,
+.editor-surface .sidebar-content,
+.editor-surface #typora-sidebar #file-library,
+.editor-surface .sidebar-tabs {
+    background-color: var(--bg-page);
+    color: var(--fg-main);
+    font-family: var(--font-body);
+    font-size: 15px;
+}
+
+/* 文件树 / 文件列表条目 — 稍紧的行高，可读性更好 */
+.editor-surface #typora-sidebar .file-list-item,
+.editor-surface #typora-sidebar .file-node-content,
+.editor-surface #typora-sidebar .file-tree-node,
+.editor-surface #typora-sidebar .outline-item,
+.editor-surface #typora-sidebar .file-node-title,
+.editor-surface #typora-sidebar .file-list-item-summary,
+.editor-surface #typora-sidebar :is(a, :where(.vditor-ir__link, .itypora-reference-link)) {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--fg-main) !important;
+}
+
+.editor-surface .sidebar-tabs .tab.active,
+.editor-surface .file-list-item.active,
+.editor-surface .file-tree-node.active > .file-node-content {
+    background-color: var(--bg-soft) !important;
+    color: var(--accent-deep) !important;
+}
+
+/* 选中项左侧默认是白条，覆盖成主题强调色 */
+.editor-surface #typora-sidebar .file-list-item.active::before,
+.editor-surface #typora-sidebar .file-list-item.ty-file-active::before,
+.editor-surface #typora-sidebar .file-tree-node.active > .file-node-content::before,
+.editor-surface #typora-sidebar .file-tree-node.ty-file-active > .file-node-content::before {
+    background-color: var(--accent) !important;
+    background: var(--accent) !important;
+}
+.editor-surface #typora-sidebar .file-list-item.active,
+.editor-surface #typora-sidebar .file-tree-node.active > .file-node-content {
+    border-left-color: var(--accent) !important;
+    box-shadow: inset 3px 0 0 var(--accent) !important;
+}
+
+/* 标签栏（"文件" / "大纲"）— 暗底上保证可读 */
+.editor-surface .sidebar-tabs .tab,
+.editor-surface .sidebar-tabs span {
+    color: var(--fg-muted) !important;
+}
+.editor-surface .sidebar-tabs .tab.active {
+    color: var(--accent-deep) !important;
+}
+
+/* 顶部工具栏 / 窗口 */
+.editor-surface #top-titlebar,
+.editor-surface header,
+.editor-surface .megamenu-content,
+.editor-surface footer {
+    background: var(--bg-page);
+    color: var(--fg-main);
+    font-family: var(--font-body);
+}
+
+/* 源码模式编辑器 */
+.editor-surface #typora-source .CodeMirror {
+    background: var(--bg-write);
+    color: var(--fg-main);
+    font-family: var(--font-mono);
+    font-size: 18px;
+}
+
+.editor-surface #typora-source .CodeMirror-gutters {
+    background: var(--bg-write);
+    border-right: 1px solid rgba(127, 190, 146, 0.12);
+}
+.editor-surface #typora-source .CodeMirror-linenumber {
+    color: var(--fg-faint);
+}
+
+/* 源码模式语法配色 — 与渲染视图一致的浅色调 */
+.editor-surface #typora-source .CodeMirror :is(.cm-header, .hljs-section),
+.editor-surface #typora-source .CodeMirror .cm-header-1,
+.editor-surface #typora-source .CodeMirror .cm-header-2,
+.editor-surface #typora-source .CodeMirror .cm-header-3,
+.editor-surface #typora-source .CodeMirror .cm-header-4,
+.editor-surface #typora-source .CodeMirror .cm-header-5,
+.editor-surface #typora-source .CodeMirror .cm-header-6 {
+    color: var(--accent-deep) !important;
+    font-weight: 700;
+}
+.editor-surface #typora-source .CodeMirror :is(.cm-keyword, .hljs-keyword),
+.editor-surface #typora-source .CodeMirror :is(.cm-meta, .hljs-meta) {
+    color: var(--accent-deep) !important;
+    font-weight: 600;
+}
+.editor-surface #typora-source .CodeMirror :is(.cm-string, .hljs-string),
+.editor-surface #typora-source .CodeMirror .cm-string-2 {
+    color: var(--accent) !important;
+    font-style: normal;
+}
+.editor-surface #typora-source .CodeMirror :is(.cm-comment, .hljs-comment, .hljs-code) {
+    color: var(--fg-muted) !important;
+    font-style: italic;
+}
+.editor-surface #typora-source .CodeMirror :is(.cm-variable, .hljs-variable),
+.editor-surface #typora-source .CodeMirror :is(.cm-variable-2, .hljs-params),
+.editor-surface #typora-source .CodeMirror .cm-variable-3,
+.editor-surface #typora-source .CodeMirror :is(.cm-operator, .hljs-operator),
+.editor-surface #typora-source .CodeMirror .cm-bracket,
+.editor-surface #typora-source .CodeMirror :is(.cm-def, .hljs-title) {
+    color: var(--fg-main) !important;
+}
+.editor-surface #typora-source .CodeMirror :is(.cm-property, .hljs-attr, .hljs-property),
+.editor-surface #typora-source .CodeMirror :is(.cm-attribute, .hljs-attribute),
+.editor-surface #typora-source .CodeMirror :is(.cm-tag, .hljs-tag),
+.editor-surface #typora-source .CodeMirror .cm-link,
+.editor-surface #typora-source .CodeMirror .cm-url,
+.editor-surface #typora-source .CodeMirror :is(.cm-builtin, .hljs-built_in),
+.editor-surface #typora-source .CodeMirror .cm-qualifier {
+    color: var(--accent) !important;
+}
+.editor-surface #typora-source .CodeMirror :is(.cm-number, .hljs-number) {
+    color: #a06d3b !important;
+}
+.editor-surface #typora-source .CodeMirror :is(.cm-quote, .hljs-quote) {
+    color: var(--fg-muted) !important;
+    font-style: italic;
+}
+/* 源码模式行内代码 — 与渲染视图保持一致 */
+.editor-surface #typora-source .CodeMirror .cm-formatting-code,
+.editor-surface #typora-source .CodeMirror .cm-formatting-code-block {
+    color: var(--accent-soft) !important;
+}
+.editor-surface #typora-source .CodeMirror :is(.cm-em, .hljs-emphasis) {
+    color: var(--fg-main) !important;
+    font-style: italic;
+}
+.editor-surface #typora-source .CodeMirror :is(.cm-strong, .hljs-strong) {
+    color: var(--accent-deep) !important;
+    font-weight: 700;
+}
+.editor-surface #typora-source .CodeMirror .cm-hr {
+    color: var(--accent-soft) !important;
+}
+
+/* 源码模式行内代码 `...` — 与渲染视图保持一致 */
+.editor-surface #typora-source .CodeMirror .cm-inline-code,
+.editor-surface #typora-source .CodeMirror .cm-formatting-code,
+.editor-surface #typora-source .CodeMirror span:is(.cm-comment, .hljs-comment, .hljs-code).cm-formatting-code {
+    color: var(--accent-deep) !important;
+    background: var(--bg-inline-code);
+    border-radius: 3px;
+    padding: 0 3px;
+    font-family: var(--font-mono);
+}
+
+/* 源码模式中的围栏代码块 ``` ... ``` — 加深海军蓝条带，
+   与渲染视图同色，语法配色用 JetBrains 风格 */
+.editor-surface #typora-source .CodeMirror .CodeMirror-line .cm-formatting-code-block,
+.editor-surface #typora-source .CodeMirror .HyperMD-codeblock,
+.editor-surface #typora-source .CodeMirror .HyperMD-codeblock-begin,
+.editor-surface #typora-source .CodeMirror .HyperMD-codeblock-end,
+.editor-surface #typora-source .CodeMirror pre.HyperMD-codeblock,
+.editor-surface #typora-source .CodeMirror .cm-fenced-code-block {
+    background: var(--code-bg);
+    color: var(--code-fg) !important;
+    font-family: var(--font-mono);
+}
+
+/* 如果 Typora 暴露了相应 class，给围栏条带的起止两端加圆角 */
+.editor-surface #typora-source .CodeMirror .HyperMD-codeblock-begin {
+    border-top-left-radius: var(--radius);
+    border-top-right-radius: var(--radius);
+    padding-top: 4px;
+}
+.editor-surface #typora-source .CodeMirror .HyperMD-codeblock-end {
+    border-bottom-left-radius: var(--radius);
+    border-bottom-right-radius: var(--radius);
+    padding-bottom: 4px;
+}
+
+/* 围栏区内的关键字 / 字符串 / 数字 — 与渲染视图同色 */
+.editor-surface #typora-source .CodeMirror .HyperMD-codeblock :is(.cm-keyword, .hljs-keyword),
+.editor-surface #typora-source .CodeMirror .cm-fenced-code-block :is(.cm-keyword, .hljs-keyword) {
+    color: var(--cm-keyword) !important;
+}
+.editor-surface #typora-source .CodeMirror .HyperMD-codeblock :is(.cm-string, .hljs-string),
+.editor-surface #typora-source .CodeMirror .HyperMD-codeblock .cm-string-2,
+.editor-surface #typora-source .CodeMirror .cm-fenced-code-block :is(.cm-string, .hljs-string) {
+    color: var(--cm-string) !important;
+}
+.editor-surface #typora-source .CodeMirror .HyperMD-codeblock :is(.cm-number, .hljs-number),
+.editor-surface #typora-source .CodeMirror .cm-fenced-code-block :is(.cm-number, .hljs-number) {
+    color: var(--cm-number) !important;
+}
+.editor-surface #typora-source .CodeMirror .HyperMD-codeblock :is(.cm-comment, .hljs-comment, .hljs-code),
+.editor-surface #typora-source .CodeMirror .cm-fenced-code-block :is(.cm-comment, .hljs-comment, .hljs-code) {
+    color: var(--cm-comment) !important;
+    font-style: italic;
+}
+.editor-surface #typora-source .CodeMirror .HyperMD-codeblock :is(.cm-variable, .hljs-variable),
+.editor-surface #typora-source .CodeMirror .HyperMD-codeblock :is(.cm-variable-2, .hljs-params),
+.editor-surface #typora-source .CodeMirror .HyperMD-codeblock :is(.cm-def, .hljs-title) {
+    color: var(--cm-def) !important;
+}
+.editor-surface #typora-source .CodeMirror .HyperMD-codeblock .cm-variable-3,
+.editor-surface #typora-source .CodeMirror .HyperMD-codeblock :is(.cm-builtin, .hljs-built_in) {
+    color: var(--cm-type) !important;
+}
+.editor-surface #typora-source .CodeMirror .HyperMD-codeblock :is(.cm-property, .hljs-attr, .hljs-property),
+.editor-surface #typora-source .CodeMirror .HyperMD-codeblock :is(.cm-attribute, .hljs-attribute) {
+    color: var(--cm-property) !important;
+}
+.editor-surface #typora-source .CodeMirror .HyperMD-codeblock :is(.cm-operator, .hljs-operator),
+.editor-surface #typora-source .CodeMirror .HyperMD-codeblock .cm-bracket {
+    color: var(--cm-operator) !important;
+}
+
+/* ---------- 段落与行内 ---------- */
+.editor-surface #write p {
+    margin: 0.9em 0;
+    letter-spacing: 0.01em;
+}
+
+.editor-surface #write strong,
+.editor-surface #write b {
+    color: var(--accent-deep);
+    font-weight: 700;
+}
+
+.editor-surface #write em,
+.editor-surface #write i {
+    color: var(--fg-main);
+    font-style: italic;
+}
+
+.editor-surface #write :is(a, :where(.vditor-ir__link, .itypora-reference-link)) {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(127, 190, 146, 0.5);
+    transition:
+        color 0.15s ease,
+        border-color 0.15s ease;
+}
+.editor-surface #write :is(a, :where(.vditor-ir__link, .itypora-reference-link)):hover {
+    color: var(--accent-deep);
+    border-bottom-color: var(--accent-deep);
+}
+
+.editor-surface #write mark {
+    background: rgba(194, 168, 120, 0.35);
+    color: var(--fg-heading);
+    padding: 0 2px;
+    border-radius: 2px;
+}
+
+.editor-surface #write kbd {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    font-weight: 600;
+    color: var(--fg-heading);
+    background: linear-gradient(
+        180deg,
+        var(--bg-write) 0%,
+        var(--bg-soft) 100%
+    );
+    border: 1px solid rgba(127, 190, 146, 0.35);
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    padding: 1px 6px;
+    margin: 0 1px;
+    line-height: 1.4;
+    box-shadow:
+        0 1px 0 rgba(0, 0, 0, 0.1),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.4);
+    vertical-align: 1px;
+    white-space: nowrap;
+}
+
+.editor-surface #write abbr,
+.editor-surface #write abbr[title] {
+    color: var(--accent-deep);
+    text-decoration: underline dotted var(--accent);
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 3px;
+    cursor: help;
+    font-weight: 600;
+    border-bottom: none;
+}
+.editor-surface #write abbr:hover,
+.editor-surface #write abbr[title]:hover {
+    color: var(--accent);
+    text-decoration-color: var(--accent-deep);
+    background: rgba(127, 190, 146, 0.08);
+    border-radius: 2px;
+}
+
+.editor-surface #write :is(del, s),
+.editor-surface #write s {
+    color: var(--fg-faint);
+}
+
+/* ---------- 标题 ---------- */
+.editor-surface #write h1,
+.editor-surface #write h2,
+.editor-surface #write h3,
+.editor-surface #write h4,
+.editor-surface #write h5,
+.editor-surface #write h6 {
+    font-family: var(--font-heading);
+    color: var(--fg-heading);
+    font-weight: 700;
+    line-height: 1.35;
+    margin-top: 1.6em;
+    margin-bottom: 0.6em;
+    letter-spacing: 0.005em;
+}
+
+.editor-surface #write h1 {
+    font-size: 1.85em;
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 0.35em;
+    margin-top: 0.6em;
+}
+
+.editor-surface #write h2 {
+    font-size: 1.5em;
+    color: var(--accent-deep);
+    border-bottom: 1px solid rgba(127, 190, 146, 0.25);
+    padding-bottom: 0.3em;
+}
+
+.editor-surface #write h3 {
+    font-size: 1.25em;
+    color: var(--accent-deep);
+}
+.editor-surface #write h3::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 0.95em;
+    background: var(--accent);
+    border-radius: 2px;
+    margin-right: 0.55em;
+    vertical-align: -0.08em;
+}
+
+.editor-surface #write h4 {
+    font-size: 1.1em;
+    color: var(--accent-deep);
+}
+
+.editor-surface #write h5 {
+    font-size: 1em;
+    color: var(--fg-muted);
+    text-transform: none;
+    letter-spacing: 0.04em;
+}
+
+.editor-surface #write h6 {
+    font-size: 0.95em;
+    color: var(--fg-faint);
+    font-weight: 600;
+}
+
+/* ---------- 行内代码 ---------- */
+.editor-surface #write code,
+.editor-surface #write tt {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    background: var(--bg-inline-code);
+    color: var(--accent-deep);
+    padding: 1px 6px;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(127, 190, 146, 0.15);
+    font-feature-settings:
+        "calt" 1,
+        "liga" 0;
+}
+
+.editor-surface #write :is(a, :where(.vditor-ir__link, .itypora-reference-link)) code {
+    color: var(--accent);
+}
+
+/* ---------- 代码块 (.md-fences / pre) ---------- */
+/* 只针对最外层 — 切勿命中每行 .CodeMirror-line（它也是 <pre>）*/
+.editor-surface #write pre:not(.CodeMirror-line):not(.md-meta-block),
+.editor-surface #write .md-fences,
+.editor-surface .md-fences {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    line-height: 1.62;
+    background: var(--code-bg);
+    color: var(--code-fg);
+    border: 1px solid var(--code-line);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    margin: 0.9em 0;
+    box-shadow: var(--shadow);
+    overflow: auto;
+    font-feature-settings:
+        "calt" 1,
+        "liga" 1;
+}
+
+/* 清除单行代码继承到的盒模型样式 */
+.editor-surface #write .md-fences pre,
+.editor-surface #write .md-fences .CodeMirror-line,
+.editor-surface #write pre.CodeMirror-line {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.editor-surface .md-fences .CodeMirror,
+.editor-surface .md-fences .CodeMirror-scroll,
+.editor-surface .md-fences .CodeMirror-sizer,
+.editor-surface .md-fences .CodeMirror-lines {
+    background: var(--code-bg) !important;
+    color: var(--code-fg);
+    font-family: var(--font-mono);
+    font-size: 18px;
+    line-height: 1.62;
+}
+
+.editor-surface .md-fences .CodeMirror-gutters {
+    background: var(--code-bg) !important;
+    border-right: 1px solid var(--code-line);
+}
+.editor-surface .md-fences .CodeMirror-gutter,
+.editor-surface .md-fences .CodeMirror-gutter-wrapper,
+.editor-surface .md-fences .CodeMirror-gutter-elt {
+    background: var(--code-bg) !important;
+    border-right: none !important;
+}
+
+.editor-surface .md-fences .CodeMirror-linenumber {
+    color: var(--code-gutter);
+}
+
+/* 把代码往右推，让它远离 gutter 分隔线（分隔线本身不动）*/
+.editor-surface #write .md-fences .CodeMirror-line,
+.editor-surface #write pre.CodeMirror-line {
+    padding-left: 14px !important;
+}
+
+.editor-surface .md-fences .CodeMirror-cursor,
+.editor-surface .md-fences .CodeMirror-cursors .CodeMirror-cursor,
+.editor-surface .md-fences div.CodeMirror-cursor {
+    border-left: 2px solid var(--accent-warm) !important;
+    border-right: none !important;
+}
+
+/* 代码块在 fat-cursor / 覆盖模式下的光标 */
+.editor-surface .md-fences .CodeMirror-fat-cursor .CodeMirror-cursor {
+    background: var(--accent-warm) !important;
+    color: var(--code-bg) !important;
+}
+
+.editor-surface .md-fences .CodeMirror-selected {
+    background: rgba(125, 186, 139, 0.32) !important;
+}
+.editor-surface .md-fences .CodeMirror-selectedtext {
+    background: transparent !important;
+    color: inherit !important;
+}
+
+.editor-surface .md-fences .CodeMirror-activeline-background,
+.editor-surface .md-fences .CodeMirror-activeline .CodeMirror-gutter-elt {
+    background: transparent !important;
+}
+
+/* 围栏右下的语言提示标签 */
+.editor-surface .md-fences .ty-cm-lang-input {
+    color: var(--code-gutter);
+}
+
+.editor-surface .md-fences-adv-panel {
+    background: var(--code-bg-soft);
+    color: var(--code-fg);
+    border-radius: var(--radius);
+}
+
+/* ---------- Mermaid 图表 ---------- */
+/* 外层面板画框，内层预览透明，避免双层框 */
+.editor-surface #write .md-diagram-panel {
+    background: var(--bg-formula) !important;
+    color: var(--fg-main) !important;
+    border: 1px solid rgba(127, 190, 146, 0.2);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--shadow-sm);
+    font-family: var(--font-body) !important;
+}
+.editor-surface #write .md-diagram-panel {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    color: var(--fg-main) !important;
+    font-family: var(--font-body) !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+}
+
+/* 让外层面板和围栏跟随图表自适应高度 */
+.editor-surface #write .md-diagram-panel {
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
+}
+.editor-surface #write .md-fences:has(.md-diagram-panel) {
+    height: auto !important;
+    overflow: visible !important;
+}
+
+/* 编辑状态下，编辑器与预览图之间留一点间距，各自保持圆角卡片外观 */
+.editor-surface #write .md-fences.md-focus .md-diagram-panel,
+.editor-surface #write .md-fences:focus-within .md-diagram-panel,
+.editor-surface #write .md-fences.md-focus + .md-diagram-panel,
+.editor-surface #write .md-fences:focus-within + .md-diagram-panel {
+    margin-top: 20px !important;
+}
+
+/* 隐藏图表围栏右上角浮动的语言标签 —
+   否则会盖住预览区域。覆盖所有已知 class */
+.editor-surface #write .md-fences:has(.md-diagram-panel) .fences-info,
+.editor-surface #write .md-fences:has(.md-diagram-panel) .md-fences-action-buttons,
+.editor-surface #write .md-fences:has(.md-diagram-panel) .md-fences-lang,
+.editor-surface #write .md-fences:has(.md-diagram-panel) .md-fences-lang-input,
+.editor-surface #write .md-fences:has(.md-diagram-panel) .md-fences-lang-display,
+.editor-surface #write .md-fences:has(.md-diagram-panel) .code-tooltip,
+.editor-surface #write .md-fences:has(.md-diagram-panel) .md-fences-tip,
+.editor-surface #write .md-fences:has(.md-diagram-panel) .md-mermaid-lang,
+.editor-surface #write .md-fences:has(.md-diagram-panel) .ty-cm-lang-input,
+.editor-surface #write .md-fences:has(.md-diagram-panel) [class*="lang-display"],
+.editor-surface #write .md-fences:has(.md-diagram-panel) [class*="fences-info"] {
+    display: none !important;
+    visibility: hidden !important;
+    content: none !important;
+}
+
+/* 如果 Typora 用伪元素画语言标签，也一并干掉 */
+.editor-surface #write .md-fences:has(.md-diagram-panel)::before,
+.editor-surface #write .md-fences:has(.md-diagram-panel)::after,
+.editor-surface #write .md-fences:has(.md-diagram-panel) .md-diagram-panel::before,
+.editor-surface #write .md-fences:has(.md-diagram-panel) .md-diagram-panel::after,
+.editor-surface #write .md-diagram-panel::before,
+.editor-surface #write .md-diagram-panel::after {
+    display: none !important;
+    content: none !important;
+}
+
+.editor-surface #write .md-diagram-panel svg {
+    background: transparent !important;
+}
+
+/* 节点形状（矩形 / 菱形 / 圆形 等）*/
+.editor-surface #write .md-diagram-panel .node :is(rect, circle, polygon, ellipse, path) {
+    fill: var(--bg-write) !important;
+    stroke: var(--accent-deep) !important;
+    stroke-width: 1.5px !important;
+}
+
+/* 子图 / cluster 框 */
+.editor-surface #write .md-diagram-panel .cluster rect {
+    fill: rgba(127, 190, 146, 0.06) !important;
+    stroke: var(--accent-soft) !important;
+    stroke-width: 1px !important;
+}
+
+/* 连接线 */
+.editor-surface #write .md-diagram-panel .edgePath .path,
+.editor-surface #write .md-diagram-panel .flowchart-link,
+.editor-surface #write .md-diagram-panel path.edge {
+    stroke: var(--accent) !important;
+    stroke-width: 1.5px !important;
+    fill: none !important;
+}
+
+/* 箭头 — 默认实心（组合关系、普通箭头、依赖等）*/
+.editor-surface #write .md-diagram-panel marker :is(path, polygon) {
+    fill: var(--accent) !important;
+    stroke: var(--accent) !important;
+}
+
+/* 空心标记 — 聚合菱形 (o--)、继承三角 (--|>)、lollipop 圆。
+   填充图表底色让它们"空心"，保留描边 */
+.editor-surface #write .md-diagram-panel marker[id*="aggregation"] :is(path, polygon), .editor-surface #write .md-diagram-panel marker[id*="extension"] :is(path, polygon), .editor-surface #write .md-diagram-panel marker[id*="lollipop"] :is(path, polygon), .editor-surface #write .md-diagram-panel marker[id*="hollow"] path, .editor-surface #write .md-diagram-panel marker[id*="open"] path {
+    fill: var(--bg-formula) !important;
+    stroke: var(--accent) !important;
+    stroke-width: 1.2px !important;
+}
+
+/* 连线标签（yes / no 等）— 清除外层容器样式，只给内层 span 套样式 */
+.editor-surface #write .md-diagram-panel .edgeLabel {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    color: var(--fg-main) !important;
+    font-family: var(--font-body) !important;
+}
+.editor-surface #write .md-diagram-panel .edgeLabel rect,
+.editor-surface #write .md-diagram-panel .edgeLabel .label-container {
+    fill: transparent !important;
+    stroke: none !important;
+}
+
+/* 第 1 步：清空 foreignObject 内所有元素样式，防止嵌套层画框 */
+.editor-surface #write .md-diagram-panel .edgeLabel foreignObject,
+.editor-surface #write .md-diagram-panel .edgeLabel foreignObject * {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    outline: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    color: var(--fg-main) !important;
+    font-family: var(--font-body) !important;
+    line-height: 1.4;
+}
+
+/* 第 2 步：只给最外层元素（foreignObject 的直接子元素 / body 包装）加主题框 */
+.editor-surface #write
+    .md-diagram-panel
+    .edgeLabel
+    foreignObject
+    > *:not(.labelBkg):not(:empty),
+.editor-surface #write
+    .md-diagram-panel
+    .edgeLabel
+    foreignObject
+    > .editor-surface
+    > *:not(.labelBkg):not(:empty),
+.editor-surface #write
+    .md-diagram-panel
+    .edgeLabel
+    foreignObject
+    > div
+    > *:not(.labelBkg):not(:empty) {
+    background: var(--bg-write) !important;
+    border: 1.2px solid var(--accent) !important;
+    border-radius: 5px !important;
+    padding: 1px 8px !important;
+    display: inline-block !important;
+    white-space: nowrap !important;
+}
+
+/* 隐藏 mermaid 用于布局测量的空 / 零尺寸 foreignObject */
+.editor-surface #write .md-diagram-panel foreignObject:empty,
+.editor-surface #write .md-diagram-panel foreignObject[width="0"],
+.editor-surface #write .md-diagram-panel foreignObject[height="0"],
+.editor-surface #write .md-diagram-panel .edgeLabel:empty {
+    display: none !important;
+}
+
+/* 仅在显示预览时（未聚焦）剥离围栏的深色框。
+   用户点入编辑后 focus-within 为 true → 围栏保留深色代码块外观 */
+.editor-surface #write .md-fences.md-fences-with-preview:not(.md-focus):not(:focus-within),
+.editor-surface #write .md-fences:has(.md-diagram-panel):not(.md-focus):not(:focus-within) {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    color: var(--fg-main) !important;
+}
+
+/* 图表内所有文字 — 暗底必须用浅色 */
+.editor-surface #write .md-diagram-panel svg text,
+.editor-surface #write .md-diagram-panel svg tspan,
+.editor-surface #write .md-diagram-panel text,
+.editor-surface #write .md-diagram-panel tspan,
+.editor-surface #write .md-diagram-panel .nodeLabel,
+.editor-surface #write .md-diagram-panel .label,
+.editor-surface #write .md-diagram-panel foreignObject,
+.editor-surface #write .md-diagram-panel foreignObject div,
+.editor-surface #write .md-diagram-panel foreignObject p,
+.editor-surface #write .md-diagram-panel foreignObject span {
+    color: var(--fg-main) !important;
+    fill: var(--fg-main) !important;
+    font-family: var(--font-body) !important;
+    font-size: 16px !important;
+}
+
+/* 图表内文字选中 — 主题深绿 */
+.editor-surface #write .md-diagram-panel ::selection,
+.editor-surface #write .md-diagram-panel text::selection,
+.editor-surface #write .md-diagram-panel foreignObject *::selection {
+    background: var(--accent-deep) !important;
+    color: var(--bg-write) !important;
+}
+
+/* 序列图 */
+.editor-surface #write .md-diagram-panel .actor {
+    fill: var(--bg-write) !important;
+    stroke: var(--accent-deep) !important;
+}
+
+/* 演员生命线（连接 actor 上下两端的纵向虚线）*/
+.editor-surface #write .md-diagram-panel .actor-line,
+.editor-surface #write .md-diagram-panel line.actor-line {
+    stroke: var(--accent-soft) !important;
+    stroke-width: 1.2px !important;
+    stroke-dasharray: 5 4 !important;
+    fill: none !important;
+}
+.editor-surface #write .md-diagram-panel .messageLine0,
+.editor-surface #write .md-diagram-panel .messageLine1 {
+    stroke: var(--accent) !important;
+}
+.editor-surface #write .md-diagram-panel .activation0,
+.editor-surface #write .md-diagram-panel .activation1,
+.editor-surface #write .md-diagram-panel .activation2 {
+    display: none !important;
+}
+
+/* 序列图自动编号（圆 + 圆内数字）*/
+.editor-surface #write .md-diagram-panel text.sequenceNumber,
+.editor-surface #write .md-diagram-panel .sequenceNumber {
+    fill: var(--bg-write) !important;
+    color: var(--bg-write) !important;
+    font-family:
+        -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+        sans-serif !important;
+    font-weight: 700;
+    text-anchor: middle !important;
+    dominant-baseline: middle !important;
+    alignment-baseline: middle !important;
+    transform: translateY(-2px);
+}
+.editor-surface #write .md-diagram-panel g.sequenceNumber circle,
+.editor-surface #write .md-diagram-panel circle.sequenceNumber {
+    fill: var(--accent-deep) !important;
+    stroke: var(--accent-deep) !important;
+}
+
+/* 兜底：未被命名的小填充圆（序列图小点等）*/
+.editor-surface #write .md-diagram-panel circle:not([class]) {
+    fill: var(--accent) !important;
+    stroke: var(--accent-deep) !important;
+}
+
+/* alt / opt / loop 块底色 — mermaid 默认浅紫，改成主题色 */
+.editor-surface #write .md-diagram-panel .note rect,
+.editor-surface #write .md-diagram-panel rect.note {
+    fill: var(--bg-formula) !important;
+    stroke: var(--accent) !important;
+    stroke-width: 1px !important;
+}
+
+.editor-surface #write .md-diagram-panel rect.actor {
+    fill: var(--bg-write) !important;
+    stroke: var(--accent-deep) !important;
+}
+
+/* alt / opt / loop 块轮廓线 */
+.editor-surface #write .md-diagram-panel .loopLine {
+    stroke: var(--accent-soft) !important;
+    stroke-dasharray: 4 3 !important;
+    fill: none !important;
+}
+
+/* alt / loop 标签胶囊（小 alt / loop / opt 徽章）*/
+.editor-surface #write .md-diagram-panel .labelBox {
+    fill: var(--bg-write) !important;
+    stroke: var(--accent) !important;
+}
+.editor-surface #write .md-diagram-panel .labelText,
+.editor-surface #write .md-diagram-panel .loopText {
+    fill: var(--fg-main) !important;
+    font-family: var(--font-body) !important;
+}
+
+/* alt / opt 大背景块（通常是 class 含 actor-N 之类的 rect）*/
+.editor-surface #write .md-diagram-panel g.alt rect,
+.editor-surface #write .md-diagram-panel g.opt rect,
+.editor-surface #write .md-diagram-panel g.loop rect {
+    fill: rgba(127, 190, 146, 0.06) !important;
+    stroke: var(--accent-soft) !important;
+}
+
+/* mermaid 给 alt/opt 写在 inline style 里的 rgb 填充 — 用属性选择器覆盖 */
+.editor-surface #write .md-diagram-panel rect[fill^="rgb"]:not(.actor):not(.note) {
+    fill: rgba(127, 190, 146, 0.06) !important;
+}
+
+/* Gantt / class / state — 通用兜底 */
+.editor-surface #write .md-diagram-panel .titleText {
+    fill: var(--fg-heading) !important;
+    font-family: var(--font-body) !important;
+    font-weight: 700 !important;
+}
+
+/* Gantt SVG — 强制 100% 宽度，让它和其他图一样占满 */
+.editor-surface #write .md-fences:has(svg[aria-roledescription="gantt"]) .md-diagram-panel {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="gantt"] {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+}
+
+/* Gantt 文字 — 匹配 mermaid 默认布局的较小字号 */
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="gantt"] text {
+    font-size: 11px !important;
+}
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="gantt"] .titleText {
+    font-size: 14px !important;
+}
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="gantt"] .grid .tick text {
+    font-size: 10px !important;
+}
+
+/* ---------- zenUML 时序图 ---------- */
+/* zenUML 使用 Tailwind 风格的工具类（如 .bg-skin-participant）。
+   把这些 "skin" 令牌全部换成主题色 */
+.editor-surface #write .md-diagram-panel .zenuml {
+    background: transparent !important;
+    color: var(--fg-main) !important;
+    font-family: var(--font-body) !important;
+}
+
+/* 外层 frame */
+.editor-surface #write .md-diagram-panel .frame,
+.editor-surface #write .md-diagram-panel .bg-skin-frame {
+    background: var(--bg-write) !important;
+}
+.editor-surface #write .md-diagram-panel .border-skin-frame {
+    border-color: var(--accent-soft) !important;
+}
+.editor-surface #write .md-diagram-panel .text-skin-frame {
+    color: var(--fg-main) !important;
+}
+
+/* 顶部标题条 */
+.editor-surface #write .md-diagram-panel .bg-skin-title {
+    background: rgba(127, 190, 146, 0.08) !important;
+}
+.editor-surface #write .md-diagram-panel .text-skin-title {
+    color: var(--accent-deep) !important;
+}
+
+/* 参与者方块（Consumer / API / BookingService 等 chip）*/
+.editor-surface #write .md-diagram-panel .participant,
+.editor-surface #write .md-diagram-panel .bg-skin-participant {
+    background: var(--accent-deep) !important;
+    color: var(--bg-write) !important;
+}
+.editor-surface #write .md-diagram-panel .border-skin-participant {
+    border-color: var(--accent-deep) !important;
+    border-width: 1.5px !important;
+}
+.editor-surface #write .md-diagram-panel .text-skin-participant {
+    color: var(--bg-write) !important;
+}
+.editor-surface #write .md-diagram-panel .shadow-participant {
+    box-shadow: var(--shadow-sm) !important;
+}
+
+/* 每个参与者下方的纵向生命线 */
+.editor-surface #write .md-diagram-panel .lifeline .line,
+.editor-surface #write .md-diagram-panel .life-line .line {
+    background: var(--accent-soft) !important;
+    border-left: 1.5px dashed var(--accent-soft) !important;
+}
+
+/* 画布（整个 zenUML 背景）*/
+.editor-surface #write .md-diagram-panel .bg-skin-canvas {
+    background: transparent !important;
+}
+
+/* 消息线（参与者之间的箭头主体）*/
+.editor-surface #write .md-diagram-panel .border-skin-message-arrow {
+    border-color: var(--accent) !important;
+    border-bottom-color: var(--accent) !important;
+}
+.editor-surface #write .md-diagram-panel .text-skin-message-arrow {
+    color: var(--accent) !important;
+    fill: var(--accent) !important;
+    stroke: var(--accent) !important;
+}
+.editor-surface #write .md-diagram-panel .text-skin-message {
+    color: var(--fg-main) !important;
+}
+.editor-surface #write .md-diagram-panel .text-skin-message-hover {
+    color: var(--accent-deep) !important;
+}
+.editor-surface #write .md-diagram-panel .bg-skin-message-hover {
+    background: rgba(127, 190, 146, 0.1) !important;
+}
+
+/* 箭头头部（SVG polyline 尖端）*/
+.editor-surface #write .md-diagram-panel .arrow {
+    color: var(--accent) !important;
+}
+.editor-surface #write .md-diagram-panel .arrow polyline {
+    fill: var(--accent) !important;
+    stroke: var(--accent) !important;
+}
+
+/* 片段块（try / catch / finally / alt / loop）*/
+.editor-surface #write .md-diagram-panel .fragment {
+    background: rgba(127, 190, 146, 0.04) !important;
+    border-radius: 4px !important;
+}
+.editor-surface #write .md-diagram-panel .border-skin-fragment {
+    border-color: var(--accent-soft) !important;
+    border-width: 1px !important;
+    border-style: solid !important;
+}
+.editor-surface #write .md-diagram-panel .text-skin-fragment {
+    color: var(--accent-deep) !important;
+}
+
+/* 片段头（块顶部的 "Try" / "catch" / "finally" 标签）*/
+.editor-surface #write .md-diagram-panel .bg-skin-fragment-header {
+    background: var(--accent) !important;
+}
+.editor-surface #write .md-diagram-panel .text-skin-fragment-header {
+    color: var(--bg-write) !important;
+}
+
+/* 关键字 chip（catch / finally / loop 等）*/
+.editor-surface #write .md-diagram-panel .keyword {
+    color: var(--accent-deep) !important;
+    font-weight: 700 !important;
+}
+
+/* 控制条（底部）*/
+.editor-surface #write .md-diagram-panel .text-skin-control {
+    color: var(--fg-muted) !important;
+}
+
+/* 语句容器 — 保持透明，让 fragment 边框显示 */
+.editor-surface #write .md-diagram-panel .statement-container {
+    background: transparent !important;
+}
+
+/* 占用 / 激活条（如果显示）*/
+.editor-surface #write .md-diagram-panel .occurrence {
+    background: var(--accent-soft) !important;
+    border: 1px solid var(--accent) !important;
+}
+
+/* ---------- 思维导图 ---------- */
+/* 根节点 — 深森林绿底 + 浅色文字 */
+.editor-surface #write .md-diagram-panel g.section-root :is(rect, path, circle, polygon) {
+    fill: var(--accent-deep) !important;
+    stroke: var(--accent-deep) !important;
+    stroke-width: 1.5px !important;
+}
+.editor-surface #write .md-diagram-panel g.section-root text,
+.editor-surface #write .md-diagram-panel g.section-root .nodeLabel,
+.editor-surface #write .md-diagram-panel g.section-root foreignObject * {
+    fill: var(--bg-write) !important;
+    color: var(--bg-write) !important;
+    font-family: var(--font-body) !important;
+}
+
+/* 节区节点（根节点子级）— 围绕森林绿的 12 色调色板 */
+.editor-surface #write .md-diagram-panel g.section-0 :is(rect, path, circle, polygon) {
+    fill: #2f5a40 !important;
+    stroke: #1a3324 !important;
+}
+.editor-surface #write .md-diagram-panel g.section-1 :is(rect, path, circle, polygon) {
+    fill: #4a7c59 !important;
+    stroke: #2f5a40 !important;
+}
+.editor-surface #write .md-diagram-panel g.section-2 :is(rect, path, circle, polygon) {
+    fill: #7dba8b !important;
+    stroke: #4a7c59 !important;
+}
+.editor-surface #write .md-diagram-panel g.section-3 :is(rect, path, circle, polygon) {
+    fill: #8fb39b !important;
+    stroke: #4a7c59 !important;
+}
+.editor-surface #write .md-diagram-panel g.section-4 :is(rect, path, circle, polygon) {
+    fill: #c2a878 !important;
+    stroke: #876e44 !important;
+}
+.editor-surface #write .md-diagram-panel g.section-5 :is(rect, path, circle, polygon) {
+    fill: #a09b6e !important;
+    stroke: #6e6a48 !important;
+}
+.editor-surface #write .md-diagram-panel g.section-6 :is(rect, path, circle, polygon) {
+    fill: #8b5fbf !important;
+    stroke: #5a3d80 !important;
+}
+.editor-surface #write .md-diagram-panel g.section-7 :is(rect, path, circle, polygon) {
+    fill: #4a8fc4 !important;
+    stroke: #2c5e87 !important;
+}
+.editor-surface #write .md-diagram-panel g.section-8 :is(rect, path, circle, polygon) {
+    fill: #c4564a !important;
+    stroke: #8a3a31 !important;
+}
+.editor-surface #write .md-diagram-panel g.section-9 :is(rect, path, circle, polygon) {
+    fill: #c8943a !important;
+    stroke: #8a6422 !important;
+}
+.editor-surface #write .md-diagram-panel g.section-10 :is(rect, path, circle, polygon) {
+    fill: #6b7a6f !important;
+    stroke: #4a554d !important;
+}
+.editor-surface #write .md-diagram-panel g.section-11 :is(rect, path, circle, polygon) {
+    fill: #93a098 !important;
+    stroke: #6b7a6f !important;
+}
+
+/* -preview 区域同理 */
+.editor-surface #write .md-diagram-panel g[class*="section-"] :is(rect, path, circle, polygon) {
+    stroke-width: 1.5px !important;
+}
+.editor-surface #write .md-diagram-panel g[class*="section-"] :is(rect, path, circle, polygon) {
+    stroke-width: 1.5px !important;
+}
+
+/* 所有非根节点节区文字 — 米白色，在彩色底上可读 */
+.editor-surface #write .md-diagram-panel g[class*="section-"]:not(.section-root) text,
+.editor-surface #write .md-diagram-panel g[class*="section-"]:not(.section-root) .nodeLabel,
+.editor-surface #write
+    .md-diagram-panel
+    g[class*="section-"]:not(.section-root)
+    foreignObject
+    * {
+    fill: var(--bg-write) !important;
+    color: var(--bg-write) !important;
+    font-family: var(--font-body) !important;
+}
+
+/* mindmap 连接线 — 实际 class 是 .section-edge-N（不是 .edge.section-N）*/
+.editor-surface #write .md-diagram-panel .section-edge--1 {
+    stroke: var(--accent-deep) !important;
+}
+.editor-surface #write .md-diagram-panel .section-edge-0 {
+    stroke: #2f5a40 !important;
+}
+.editor-surface #write .md-diagram-panel .section-edge-1 {
+    stroke: #4a7c59 !important;
+}
+.editor-surface #write .md-diagram-panel .section-edge-2 {
+    stroke: #7dba8b !important;
+}
+.editor-surface #write .md-diagram-panel .section-edge-3 {
+    stroke: #8fb39b !important;
+}
+.editor-surface #write .md-diagram-panel .section-edge-4 {
+    stroke: #c2a878 !important;
+}
+.editor-surface #write .md-diagram-panel .section-edge-5 {
+    stroke: #a09b6e !important;
+}
+.editor-surface #write .md-diagram-panel .section-edge-6 {
+    stroke: #8b5fbf !important;
+}
+.editor-surface #write .md-diagram-panel .section-edge-7 {
+    stroke: #4a8fc4 !important;
+}
+.editor-surface #write .md-diagram-panel .section-edge-8 {
+    stroke: #c4564a !important;
+}
+.editor-surface #write .md-diagram-panel .section-edge-9 {
+    stroke: #c8943a !important;
+}
+.editor-surface #write .md-diagram-panel .section-edge-10 {
+    stroke: #6b7a6f !important;
+}
+.editor-surface #write .md-diagram-panel .section-edge-11 {
+    stroke: #93a098 !important;
+}
+
+/* mindmap 所有连接线 — 统一线宽、无填充 */
+.editor-surface #write .md-diagram-panel path.edge,
+.editor-surface #write .md-diagram-panel [class*="section-edge"] {
+    fill: none !important;
+}
+
+/* 节点下划线 — 直接隐藏（让节点呈现纯色块）*/
+.editor-surface #write .md-diagram-panel g[class*="section-"] line,
+.editor-surface #write .md-diagram-panel .mindmap-node line {
+    display: none !important;
+}
+
+/* 根节区 (-1) 形状与文字 — mermaid 实际写作 .section--1（双连字符）*/
+.editor-surface #write .md-diagram-panel g.section--1 :is(rect, path, circle, polygon) {
+    fill: var(--accent-deep) !important;
+    stroke: var(--accent-deep) !important;
+}
+.editor-surface #write .md-diagram-panel g.section--1 text,
+.editor-surface #write .md-diagram-panel g.section--1 .nodeLabel,
+.editor-surface #write .md-diagram-panel g.section--1 foreignObject * {
+    fill: var(--bg-write) !important;
+    color: var(--bg-write) !important;
+}
+
+/* ---------- Git 图 (gitGraph) ---------- */
+/* 分支调色板 — 8 个分支对应森林绿族 + 主题色。用复合选择器 .branch.branchN + !important 压过 mermaid 内嵌的 `#mermaidChartN .branch { stroke: #333; stroke-dasharray: 2; }` */
+.editor-surface #write .md-diagram-panel line.branch.branch0,
+.editor-surface #write .md-diagram-panel line.branch.branch0 {
+    stroke: #2f5a40 !important;
+    stroke-dasharray: none !important;
+    stroke-width: 2px !important;
+}
+.editor-surface #write .md-diagram-panel line.branch.branch1 {
+    stroke: #4a7c59 !important;
+    stroke-dasharray: none !important;
+    stroke-width: 2px !important;
+}
+.editor-surface #write .md-diagram-panel line.branch.branch2 {
+    stroke: #c2a878 !important;
+    stroke-dasharray: none !important;
+    stroke-width: 2px !important;
+}
+.editor-surface #write .md-diagram-panel line.branch.branch3 {
+    stroke: #4a8fc4 !important;
+    stroke-dasharray: none !important;
+    stroke-width: 2px !important;
+}
+.editor-surface #write .md-diagram-panel line.branch.branch4 {
+    stroke: #8b5fbf !important;
+    stroke-dasharray: none !important;
+    stroke-width: 2px !important;
+}
+.editor-surface #write .md-diagram-panel line.branch.branch5 {
+    stroke: #c8943a !important;
+    stroke-dasharray: none !important;
+    stroke-width: 2px !important;
+}
+.editor-surface #write .md-diagram-panel line.branch.branch6 {
+    stroke: #c4564a !important;
+    stroke-dasharray: none !important;
+    stroke-width: 2px !important;
+}
+.editor-surface #write .md-diagram-panel line.branch.branch7 {
+    stroke: #6b7a6f !important;
+    stroke-dasharray: none !important;
+    stroke-width: 2px !important;
+}
+
+/* 连接 commit 的箭头线 — class 为 "arrow arrowN" */
+.editor-surface #write .md-diagram-panel path.arrow.arrow0 {
+    stroke: #2f5a40 !important;
+}
+.editor-surface #write .md-diagram-panel path.arrow.arrow1 {
+    stroke: #4a7c59 !important;
+}
+.editor-surface #write .md-diagram-panel path.arrow.arrow2 {
+    stroke: #c2a878 !important;
+}
+.editor-surface #write .md-diagram-panel path.arrow.arrow3 {
+    stroke: #4a8fc4 !important;
+}
+.editor-surface #write .md-diagram-panel path.arrow.arrow4 {
+    stroke: #8b5fbf !important;
+}
+.editor-surface #write .md-diagram-panel path.arrow.arrow5 {
+    stroke: #c8943a !important;
+}
+.editor-surface #write .md-diagram-panel path.arrow.arrow6 {
+    stroke: #c4564a !important;
+}
+.editor-surface #write .md-diagram-panel path.arrow.arrow7 {
+    stroke: #6b7a6f !important;
+}
+
+/* 所有分支线 — 统一线宽、无填充 */
+.editor-surface #write .md-diagram-panel [class*="branch"]:not(rect):not(text):not(g) {
+    stroke-width: 2px !important;
+    fill: none !important;
+}
+
+/* 分支线可能使用 line/path 多种 class 命名；全部覆盖 */
+.editor-surface #write .md-diagram-panel path.branch-0,
+.editor-surface #write .md-diagram-panel line.branch-0,
+.editor-surface #write .md-diagram-panel .branch-0 {
+    stroke: #2f5a40 !important;
+}
+.editor-surface #write .md-diagram-panel path.branch-1,
+.editor-surface #write .md-diagram-panel line.branch-1,
+.editor-surface #write .md-diagram-panel .branch-1 {
+    stroke: #4a7c59 !important;
+}
+.editor-surface #write .md-diagram-panel path.branch-2,
+.editor-surface #write .md-diagram-panel line.branch-2,
+.editor-surface #write .md-diagram-panel .branch-2 {
+    stroke: #c2a878 !important;
+}
+.editor-surface #write .md-diagram-panel path.branch-3,
+.editor-surface #write .md-diagram-panel line.branch-3,
+.editor-surface #write .md-diagram-panel .branch-3 {
+    stroke: #4a8fc4 !important;
+}
+.editor-surface #write .md-diagram-panel path.branch-4,
+.editor-surface #write .md-diagram-panel line.branch-4,
+.editor-surface #write .md-diagram-panel .branch-4 {
+    stroke: #8b5fbf !important;
+}
+.editor-surface #write .md-diagram-panel path.branch-5,
+.editor-surface #write .md-diagram-panel line.branch-5,
+.editor-surface #write .md-diagram-panel .branch-5 {
+    stroke: #c8943a !important;
+}
+.editor-surface #write .md-diagram-panel path.branch-6,
+.editor-surface #write .md-diagram-panel line.branch-6,
+.editor-surface #write .md-diagram-panel .branch-6 {
+    stroke: #c4564a !important;
+}
+.editor-surface #write .md-diagram-panel path.branch-7,
+.editor-surface #write .md-diagram-panel line.branch-7,
+.editor-surface #write .md-diagram-panel .branch-7 {
+    stroke: #6b7a6f !important;
+}
+
+/* gitgraph 通用线 — 任何 class 含 "branch" 的 path/line */
+.editor-surface #write .md-diagram-panel path[class*="branch"],
+.editor-surface #write .md-diagram-panel line[class*="branch"] {
+    stroke-width: 2px !important;
+    fill: none !important;
+}
+
+/* 按分支名兜底（如 branch-main、branch-develop）— 保持默认绿 */
+.editor-surface #write .md-diagram-panel path[class*="branch-main"],
+.editor-surface #write .md-diagram-panel line[class*="branch-main"],
+.editor-surface #write .md-diagram-panel path[class*="branch-master"],
+.editor-surface #write .md-diagram-panel line[class*="branch-master"] {
+    stroke: var(--accent-deep) !important;
+}
+
+/* commit 点 — 与分支同色 */
+.editor-surface #write .md-diagram-panel circle.commit0 {
+    fill: #2f5a40 !important;
+    stroke: #2f5a40 !important;
+}
+.editor-surface #write .md-diagram-panel circle.commit1 {
+    fill: #4a7c59 !important;
+    stroke: #4a7c59 !important;
+}
+.editor-surface #write .md-diagram-panel circle.commit2 {
+    fill: #c2a878 !important;
+    stroke: #c2a878 !important;
+}
+.editor-surface #write .md-diagram-panel circle.commit3 {
+    fill: #4a8fc4 !important;
+    stroke: #4a8fc4 !important;
+}
+.editor-surface #write .md-diagram-panel circle.commit4 {
+    fill: #8b5fbf !important;
+    stroke: #8b5fbf !important;
+}
+.editor-surface #write .md-diagram-panel circle.commit5 {
+    fill: #c8943a !important;
+    stroke: #c8943a !important;
+}
+.editor-surface #write .md-diagram-panel circle.commit6 {
+    fill: #c4564a !important;
+    stroke: #c4564a !important;
+}
+.editor-surface #write .md-diagram-panel circle.commit7 {
+    fill: #6b7a6f !important;
+    stroke: #6b7a6f !important;
+}
+
+/* 高亮 commit 圆（重要 commit）*/
+.editor-surface #write .md-diagram-panel circle.commit-highlight {
+    fill: var(--accent-warm) !important;
+    stroke: var(--accent-deep) !important;
+    stroke-width: 2.5px !important;
+}
+
+/* 回滚 commit — 空心 + 斜叉 */
+.editor-surface #write .md-diagram-panel circle.commit-reverse {
+    fill: var(--bg-write) !important;
+    stroke: var(--accent-deep) !important;
+    stroke-width: 2px !important;
+}
+
+/* 合并 commit — 略大的圆环以示区分 */
+.editor-surface #write .md-diagram-panel circle.commit-merge {
+    fill: var(--bg-write) !important;
+    stroke-width: 2.5px !important;
+}
+
+/* 分支标签框 — 填充色与分支同色，描边略深 */
+.editor-surface #write .md-diagram-panel rect.branchLabelBkg.label0 {
+    fill: #2f5a40 !important;
+    stroke: #1a3324 !important;
+    stroke-width: 1.5px !important;
+}
+.editor-surface #write .md-diagram-panel rect.branchLabelBkg.label1 {
+    fill: #4a7c59 !important;
+    stroke: #2f5a40 !important;
+    stroke-width: 1.5px !important;
+}
+.editor-surface #write .md-diagram-panel rect.branchLabelBkg.label2 {
+    fill: #c2a878 !important;
+    stroke: #876e44 !important;
+    stroke-width: 1.5px !important;
+}
+.editor-surface #write .md-diagram-panel rect.branchLabelBkg.label3 {
+    fill: #4a8fc4 !important;
+    stroke: #2c5e87 !important;
+    stroke-width: 1.5px !important;
+}
+.editor-surface #write .md-diagram-panel rect.branchLabelBkg.label4 {
+    fill: #8b5fbf !important;
+    stroke: #5a3d80 !important;
+    stroke-width: 1.5px !important;
+}
+.editor-surface #write .md-diagram-panel rect.branchLabelBkg.label5 {
+    fill: #c8943a !important;
+    stroke: #8a6422 !important;
+    stroke-width: 1.5px !important;
+}
+.editor-surface #write .md-diagram-panel rect.branchLabelBkg.label6 {
+    fill: #c4564a !important;
+    stroke: #8a3a31 !important;
+    stroke-width: 1.5px !important;
+}
+.editor-surface #write .md-diagram-panel rect.branchLabelBkg.label7 {
+    fill: #6b7a6f !important;
+    stroke: #4a554d !important;
+    stroke-width: 1.5px !important;
+}
+
+/* 分支标签文字 — 彩色 chip 上的白字
+   文字在 <g class="label branch-labelN"> 内，fill 由 g 继承到 text */
+.editor-surface #write .md-diagram-panel g.branch-label0,
+.editor-surface #write .md-diagram-panel g.branch-label1,
+.editor-surface #write .md-diagram-panel g.branch-label2,
+.editor-surface #write .md-diagram-panel g.branch-label3,
+.editor-surface #write .md-diagram-panel g.branch-label4,
+.editor-surface #write .md-diagram-panel g.branch-label5,
+.editor-surface #write .md-diagram-panel g.branch-label6,
+.editor-surface #write .md-diagram-panel g.branch-label7,
+.editor-surface #write .md-diagram-panel g[class*="branch-label"],
+.editor-surface #write .md-diagram-panel g[class*="branch-label"] text {
+    fill: var(--bg-write) !important;
+    color: var(--bg-write) !important;
+    font-family: var(--font-body) !important;
+    font-weight: 700 !important;
+}
+
+/* commit 下方的 ID / 消息文字 */
+.editor-surface #write .md-diagram-panel text.commit-id,
+.editor-surface #write .md-diagram-panel text.commit-msg,
+.editor-surface #write .md-diagram-panel text.commit-label {
+    fill: var(--fg-main) !important;
+    font-family: var(--font-mono) !important;
+    font-size: 13px !important;
+}
+
+/* tag 标签（标注 commit 的小旗）*/
+.editor-surface #write .md-diagram-panel rect.tag-label {
+    fill: var(--bg-formula) !important;
+    stroke: var(--accent) !important;
+}
+.editor-surface #write .md-diagram-panel text.tag-label {
+    fill: var(--accent-deep) !important;
+    font-family: var(--font-mono) !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+}
+
+/* 分支间连接 commit 的小箭头（cherry-pick / merge from）*/
+.editor-surface #write .md-diagram-panel path.commit-arrow {
+    stroke: var(--accent-soft) !important;
+    fill: none !important;
+}
+
+/* ---------- 用户旅程图 (Journey) ---------- */
+/* journey 节区头条（标着 "Go to work" / "Go home" 之类）。
+   mermaid 给的 inline fill="#191970" / "#8B008B"，按 section-type 覆盖 */
+.editor-surface #write
+    .md-diagram-panel
+    svg[aria-roledescription="journey"]
+    rect.journey-section.section-type-0 {
+    fill: #2f5a40 !important;
+    stroke: #1a3324 !important;
+}
+.editor-surface #write
+    .md-diagram-panel
+    svg[aria-roledescription="journey"]
+    rect.journey-section.section-type-1 {
+    fill: #4a7c59 !important;
+    stroke: #2f5a40 !important;
+}
+.editor-surface #write
+    .md-diagram-panel
+    svg[aria-roledescription="journey"]
+    rect.journey-section.section-type-2 {
+    fill: #c2a878 !important;
+    stroke: #876e44 !important;
+}
+.editor-surface #write
+    .md-diagram-panel
+    svg[aria-roledescription="journey"]
+    rect.journey-section.section-type-3 {
+    fill: #4a8fc4 !important;
+    stroke: #2c5e87 !important;
+}
+.editor-surface #write
+    .md-diagram-panel
+    svg[aria-roledescription="journey"]
+    rect.journey-section.section-type-4 {
+    fill: #8b5fbf !important;
+    stroke: #5a3d80 !important;
+}
+.editor-surface #write
+    .md-diagram-panel
+    svg[aria-roledescription="journey"]
+    rect.journey-section.section-type-5 {
+    fill: #c8943a !important;
+    stroke: #8a6422 !important;
+}
+.editor-surface #write
+    .md-diagram-panel
+    svg[aria-roledescription="journey"]
+    rect.journey-section.section-type-6 {
+    fill: #c4564a !important;
+    stroke: #8a3a31 !important;
+}
+.editor-surface #write
+    .md-diagram-panel
+    svg[aria-roledescription="journey"]
+    rect.journey-section.section-type-7 {
+    fill: #6b7a6f !important;
+    stroke: #4a554d !important;
+}
+
+/* 节区下的任务条 — 与所属节区同色族 */
+.editor-surface #write
+    .md-diagram-panel
+    svg[aria-roledescription="journey"]
+    rect.task.task-type-0 {
+    fill: #2f5a40 !important;
+    stroke: #1a3324 !important;
+}
+.editor-surface #write
+    .md-diagram-panel
+    svg[aria-roledescription="journey"]
+    rect.task.task-type-1 {
+    fill: #4a7c59 !important;
+    stroke: #2f5a40 !important;
+}
+.editor-surface #write
+    .md-diagram-panel
+    svg[aria-roledescription="journey"]
+    rect.task.task-type-2 {
+    fill: #c2a878 !important;
+    stroke: #876e44 !important;
+}
+.editor-surface #write
+    .md-diagram-panel
+    svg[aria-roledescription="journey"]
+    rect.task.task-type-3 {
+    fill: #4a8fc4 !important;
+    stroke: #2c5e87 !important;
+}
+.editor-surface #write
+    .md-diagram-panel
+    svg[aria-roledescription="journey"]
+    rect.task.task-type-4 {
+    fill: #8b5fbf !important;
+    stroke: #5a3d80 !important;
+}
+.editor-surface #write
+    .md-diagram-panel
+    svg[aria-roledescription="journey"]
+    rect.task.task-type-5 {
+    fill: #c8943a !important;
+    stroke: #8a6422 !important;
+}
+.editor-surface #write
+    .md-diagram-panel
+    svg[aria-roledescription="journey"]
+    rect.task.task-type-6 {
+    fill: #c4564a !important;
+    stroke: #8a3a31 !important;
+}
+.editor-surface #write
+    .md-diagram-panel
+    svg[aria-roledescription="journey"]
+    rect.task.task-type-7 {
+    fill: #6b7a6f !important;
+    stroke: #4a554d !important;
+}
+
+/* 节区 / 任务标签（用 foreignObject HTML 渲染）— 彩色条上的白字 */
+.editor-surface #write
+    .md-diagram-panel
+    svg[aria-roledescription="journey"]
+    foreignObject
+    .label,
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="journey"] foreignObject div {
+    color: var(--bg-write) !important;
+    font-family: var(--font-body) !important;
+    font-weight: 600 !important;
+}
+/* SVG <text> 兜底（不支持 foreignObject 时）*/
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="journey"] text.task,
+.editor-surface #write
+    .md-diagram-panel
+    svg[aria-roledescription="journey"]
+    text.journey-section {
+    fill: var(--bg-write) !important;
+    font-family: var(--font-body) !important;
+    font-weight: 600 !important;
+}
+
+/* 任务时间纵线（穿过每个任务的虚线）*/
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="journey"] line.task-line {
+    stroke: var(--accent-soft) !important;
+    stroke-dasharray: 4 3 !important;
+}
+
+/* 表情圆 — 评分泡（"开心 / 一般 / 难过"指示器）*/
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="journey"] circle.face {
+    fill: var(--bg-write) !important;
+    stroke: var(--accent-deep) !important;
+    stroke-width: 1.5px !important;
+}
+/* 表情圆内的嘴和眼 — 主题深绿 */
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="journey"] .mouth {
+    stroke: var(--accent-deep) !important;
+    fill: var(--accent-deep) !important;
+}
+.editor-surface #write
+    .md-diagram-panel
+    svg[aria-roledescription="journey"]
+    g
+    circle[fill="#666"] {
+    fill: var(--accent-deep) !important;
+    stroke: var(--accent-deep) !important;
+}
+
+/* 演员标记（任务顶部的小填充圆）— 不同色系 */
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="journey"] circle.actor-0 {
+    fill: var(--accent-warm) !important;
+    stroke: #876e44 !important;
+}
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="journey"] circle.actor-1 {
+    fill: var(--accent) !important;
+    stroke: var(--accent-deep) !important;
+}
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="journey"] circle.actor-2 {
+    fill: #4a8fc4 !important;
+    stroke: #2c5e87 !important;
+}
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="journey"] circle.actor-3 {
+    fill: #8b5fbf !important;
+    stroke: #5a3d80 !important;
+}
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="journey"] circle.actor-4 {
+    fill: #c4564a !important;
+    stroke: #8a3a31 !important;
+}
+
+/* 图例文字（如 Cat / Me 演员标签）*/
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="journey"] text.legend {
+    fill: var(--fg-main) !important;
+    font-family: var(--font-body) !important;
+}
+
+/* 图表顶部标题 */
+.editor-surface #write
+    .md-diagram-panel
+    svg[aria-roledescription="journey"]
+    > text[font-weight="bold"] {
+    fill: var(--fg-heading) !important;
+    font-family: var(--font-body) !important;
+}
+
+/* 底部水平时间箭头 */
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="journey"] line[marker-end] {
+    stroke: var(--accent-deep) !important;
+}
+.editor-surface #write
+    .md-diagram-panel
+    svg[aria-roledescription="journey"]
+    marker:is(#arrowhead, [id$="-arrowhead"])
+    path {
+    fill: var(--accent-deep) !important;
+}
+
+/* ---------- 包结构图 (Packet) ---------- */
+/* 包结构块矩形 — 显示字节 / 位范围的主单元格 */
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="packet"] g.packet rect,
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="packet"] .packetByte rect,
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="packet"] rect.packet-block,
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="packet"] .block {
+    fill: var(--bg-write) !important;
+    stroke: var(--accent-deep) !important;
+    stroke-width: 1.5px !important;
+}
+
+/* 用 nth-of-type 让块在主题调色板上循环，形成视觉对比 */
+.editor-surface #write
+    .md-diagram-panel
+    svg[aria-roledescription="packet"]
+    g
+    rect:nth-of-type(8n + 1) {
+    fill: rgba(47, 90, 64, 0.15) !important;
+}
+.editor-surface #write
+    .md-diagram-panel
+    svg[aria-roledescription="packet"]
+    g
+    rect:nth-of-type(8n + 2) {
+    fill: rgba(127, 190, 146, 0.15) !important;
+}
+.editor-surface #write
+    .md-diagram-panel
+    svg[aria-roledescription="packet"]
+    g
+    rect:nth-of-type(8n + 3) {
+    fill: rgba(125, 186, 139, 0.2) !important;
+}
+.editor-surface #write
+    .md-diagram-panel
+    svg[aria-roledescription="packet"]
+    g
+    rect:nth-of-type(8n + 4) {
+    fill: rgba(127, 190, 146, 0.2) !important;
+}
+.editor-surface #write
+    .md-diagram-panel
+    svg[aria-roledescription="packet"]
+    g
+    rect:nth-of-type(8n + 5) {
+    fill: rgba(194, 168, 120, 0.2) !important;
+}
+.editor-surface #write
+    .md-diagram-panel
+    svg[aria-roledescription="packet"]
+    g
+    rect:nth-of-type(8n + 6) {
+    fill: rgba(139, 95, 191, 0.15) !important;
+}
+.editor-surface #write
+    .md-diagram-panel
+    svg[aria-roledescription="packet"]
+    g
+    rect:nth-of-type(8n + 7) {
+    fill: rgba(74, 143, 196, 0.15) !important;
+}
+.editor-surface #write
+    .md-diagram-panel
+    svg[aria-roledescription="packet"]
+    g
+    rect:nth-of-type(8n) {
+    fill: rgba(196, 86, 74, 0.15) !important;
+}
+
+/* 所有 packet 矩形共享主题描边 */
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="packet"] rect {
+    stroke: var(--accent-deep) !important;
+    stroke-width: 1px !important;
+}
+
+/* 背景 rect（如果存在）— 设为透明 */
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="packet"] rect.background {
+    fill: transparent !important;
+    stroke: none !important;
+}
+
+/* packet 文字标签（块内容 + 字节号）*/
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="packet"] text {
+    fill: var(--fg-main) !important;
+    font-family: var(--font-body) !important;
+}
+
+/* 标题文字 — 醒目的标题色 */
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="packet"] text.title,
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="packet"] g.title text,
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="packet"] .packet-title {
+    fill: var(--fg-heading) !important;
+    font-weight: 700 !important;
+    font-family: var(--font-body) !important;
+}
+
+/* 边缘的字节 / 位号 */
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="packet"] text.byte,
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="packet"] text.byte-marker,
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="packet"] text.bit {
+    fill: var(--fg-muted) !important;
+    font-family: var(--font-mono) !important;
+    font-size: 11px !important;
+}
+
+/* ---------- xychart (柱状图 / 折线图) ---------- */
+/* 画布背景 — 透明，让图表面板的米色底色透上来 */
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="xychart"] rect.background {
+    fill: transparent !important;
+}
+
+/* 图表标题（顶部居中）*/
+.editor-surface #write .md-diagram-panel g.chart-title text {
+    fill: var(--fg-heading) !important;
+    font-family: var(--font-body) !important;
+    font-weight: 700 !important;
+}
+
+/* 柱条组 — 柱条是 g.bar-plot-N 的 <rect> 子元素（rect 无 class，用 inline fill）。
+   按位置 nth-of-type 12 段循环染色 */
+.editor-surface #write .md-diagram-panel g[class^="bar-plot-"] rect:nth-of-type(12n + 1) {
+    fill: #2f5a40 !important;
+    stroke: #2f5a40 !important;
+}
+.editor-surface #write .md-diagram-panel g[class^="bar-plot-"] rect:nth-of-type(12n + 2) {
+    fill: #4a7c59 !important;
+    stroke: #4a7c59 !important;
+}
+.editor-surface #write .md-diagram-panel g[class^="bar-plot-"] rect:nth-of-type(12n + 3) {
+    fill: #7dba8b !important;
+    stroke: #7dba8b !important;
+}
+.editor-surface #write .md-diagram-panel g[class^="bar-plot-"] rect:nth-of-type(12n + 4) {
+    fill: #8fb39b !important;
+    stroke: #8fb39b !important;
+}
+.editor-surface #write .md-diagram-panel g[class^="bar-plot-"] rect:nth-of-type(12n + 5) {
+    fill: #c2a878 !important;
+    stroke: #c2a878 !important;
+}
+.editor-surface #write .md-diagram-panel g[class^="bar-plot-"] rect:nth-of-type(12n + 6) {
+    fill: #a09b6e !important;
+    stroke: #a09b6e !important;
+}
+.editor-surface #write .md-diagram-panel g[class^="bar-plot-"] rect:nth-of-type(12n + 7) {
+    fill: #8b5fbf !important;
+    stroke: #8b5fbf !important;
+}
+.editor-surface #write .md-diagram-panel g[class^="bar-plot-"] rect:nth-of-type(12n + 8) {
+    fill: #4a8fc4 !important;
+    stroke: #4a8fc4 !important;
+}
+.editor-surface #write .md-diagram-panel g[class^="bar-plot-"] rect:nth-of-type(12n + 9) {
+    fill: #c4564a !important;
+    stroke: #c4564a !important;
+}
+.editor-surface #write .md-diagram-panel g[class^="bar-plot-"] rect:nth-of-type(12n + 10) {
+    fill: #c8943a !important;
+    stroke: #c8943a !important;
+}
+.editor-surface #write .md-diagram-panel g[class^="bar-plot-"] rect:nth-of-type(12n + 11) {
+    fill: #6b7a6f !important;
+    stroke: #6b7a6f !important;
+}
+.editor-surface #write .md-diagram-panel g[class^="bar-plot-"] rect:nth-of-type(12n) {
+    fill: #93a098 !important;
+    stroke: #93a098 !important;
+}
+
+/* 折线图 — <path> 在 g.line-plot-N 之内 */
+.editor-surface #write .md-diagram-panel g[class^="line-plot-"] path {
+    stroke: var(--accent-deep) !important;
+    stroke-width: 2.5px !important;
+    fill: none !important;
+}
+
+/* 底轴 (X 轴) — 主线、刻度、标签 */
+.editor-surface #write .md-diagram-panel g.bottom-axis g.axis-line path {
+    stroke: var(--accent-deep) !important;
+}
+.editor-surface #write .md-diagram-panel g.bottom-axis g.ticks path {
+    stroke: var(--accent-soft) !important;
+}
+.editor-surface #write .md-diagram-panel g.bottom-axis g.label text {
+    fill: var(--fg-muted) !important;
+    font-family: var(--font-body) !important;
+}
+
+/* 左轴 (Y 轴) — 注意 mermaid 的拼写错误 "axisl-line"（多了一个 L）*/
+.editor-surface #write .md-diagram-panel g.left-axis g.axisl-line path,
+.editor-surface #write .md-diagram-panel g.left-axis g.axis-line path {
+    stroke: var(--accent-deep) !important;
+}
+.editor-surface #write .md-diagram-panel g.left-axis g.ticks path {
+    stroke: var(--accent-soft) !important;
+}
+.editor-surface #write .md-diagram-panel g.left-axis g.label text {
+    fill: var(--fg-muted) !important;
+    font-family: var(--font-body) !important;
+}
+.editor-surface #write .md-diagram-panel g.left-axis g.title text {
+    fill: var(--accent-deep) !important;
+    font-family: var(--font-body) !important;
+    font-weight: 700 !important;
+}
+
+/* ---------- 桑基图 (Sankey) ---------- */
+/* 桑基图节点条与渐变流线 — 让 mermaid 的 inline
+   fill/stroke/gradient 透出来，而不是套用流程图节点主题 */
+.editor-surface #write .md-diagram-panel svg.sankey-svg .nodes .node rect,
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="sankey"] .nodes .node rect {
+    fill: revert-layer !important;
+    stroke: none !important;
+    stroke-width: 0 !important;
+}
+
+/* 桑基图流线渐变保留 inline url(#linearGradient-N) — 不覆盖 */
+.editor-surface #write .md-diagram-panel svg.sankey-svg .links path,
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="sankey"] .links path {
+    stroke: revert-layer !important;
+    fill: none !important;
+}
+
+/* 桑基图节点标签 — 恢复正文字色 */
+.editor-surface #write .md-diagram-panel svg.sankey-svg .node-labels text,
+.editor-surface #write .md-diagram-panel svg[aria-roledescription="sankey"] .node-labels text {
+    fill: var(--fg-main) !important;
+    font-family: var(--font-body) !important;
+}
+
+/* ---------- 饼图 ---------- */
+/* 切片 — 森林绿主题调色板，从浅到深 */
+.editor-surface #write .md-diagram-panel g[class*="pieCircle"]:nth-of-type(1) > path,
+.editor-surface #write .md-diagram-panel path.pieCircle:nth-of-type(1) {
+    fill: #2f5a40 !important; /* 深森林绿 */
+}
+.editor-surface #write .md-diagram-panel g[class*="pieCircle"]:nth-of-type(2) > path,
+.editor-surface #write .md-diagram-panel path.pieCircle:nth-of-type(2) {
+    fill: #4a7c59 !important; /* 主色 */
+}
+.editor-surface #write .md-diagram-panel g[class*="pieCircle"]:nth-of-type(3) > path,
+.editor-surface #write .md-diagram-panel path.pieCircle:nth-of-type(3) {
+    fill: #7dba8b !important; /* 中绿 */
+}
+.editor-surface #write .md-diagram-panel g[class*="pieCircle"]:nth-of-type(4) > path,
+.editor-surface #write .md-diagram-panel path.pieCircle:nth-of-type(4) {
+    fill: #8fb39b !important; /* 浅雾绿 */
+}
+.editor-surface #write .md-diagram-panel g[class*="pieCircle"]:nth-of-type(5) > path,
+.editor-surface #write .md-diagram-panel path.pieCircle:nth-of-type(5) {
+    fill: #c2a878 !important; /* 暖金（阳光）*/
+}
+.editor-surface #write .md-diagram-panel g[class*="pieCircle"]:nth-of-type(6) > path,
+.editor-surface #write .md-diagram-panel path.pieCircle:nth-of-type(6) {
+    fill: #a09b6e !important; /* 橄榄灰绿 */
+}
+.editor-surface #write .md-diagram-panel g[class*="pieCircle"]:nth-of-type(7) > path,
+.editor-surface #write .md-diagram-panel path.pieCircle:nth-of-type(7) {
+    fill: #8b5fbf !important; /* 警告块 — important 紫 */
+}
+.editor-surface #write .md-diagram-panel g[class*="pieCircle"]:nth-of-type(8) > path,
+.editor-surface #write .md-diagram-panel path.pieCircle:nth-of-type(8) {
+    fill: #4a8fc4 !important; /* 警告块 — note 蓝 */
+}
+.editor-surface #write .md-diagram-panel g[class*="pieCircle"]:nth-of-type(9) > path,
+.editor-surface #write .md-diagram-panel path.pieCircle:nth-of-type(9) {
+    fill: #c4564a !important; /* 警告块 — caution 红 */
+}
+.editor-surface #write .md-diagram-panel g[class*="pieCircle"]:nth-of-type(10) > path,
+.editor-surface #write .md-diagram-panel path.pieCircle:nth-of-type(10) {
+    fill: #c8943a !important; /* 警告块 — warning 橙 */
+}
+.editor-surface #write .md-diagram-panel g[class*="pieCircle"]:nth-of-type(11) > path,
+.editor-surface #write .md-diagram-panel path.pieCircle:nth-of-type(11) {
+    fill: #6b7a6f !important; /* 中性灰绿 */
+}
+.editor-surface #write .md-diagram-panel g[class*="pieCircle"]:nth-of-type(12) > path,
+.editor-surface #write .md-diagram-panel path.pieCircle:nth-of-type(12) {
+    fill: #93a098 !important; /* 弱化前景色 */
+}
+
+/* 所有切片路径 — 共用同一描边 */
+.editor-surface #write .md-diagram-panel path.pieCircle {
+    stroke: var(--bg-write) !important;
+    stroke-width: 2px !important;
+}
+
+/* 切片百分比 / 数值标签（图内）*/
+.editor-surface #write .md-diagram-panel text.slice {
+    fill: var(--bg-write) !important;
+    font-family: var(--font-body) !important;
+    font-weight: 700 !important;
+}
+
+/* 饼图标题 */
+.editor-surface #write .md-diagram-panel text.pieTitleText {
+    fill: var(--fg-heading) !important;
+    font-family: var(--font-body) !important;
+    font-weight: 700 !important;
+}
+
+/* 图例色块 — 小色方块与切片同色。
+   图例文字使用正文字体 / 主题色 */
+.editor-surface #write .md-diagram-panel g.legend text,
+.editor-surface #write .md-diagram-panel .legend text {
+    fill: var(--fg-main) !important;
+    font-family: var(--font-body) !important;
+}
+
+/* 图例色块 — 每个 <g class="legend"> 是同级 g，含一个 rect + 一个 text。
+   按图例 g 在兄弟节点中的位置依次染色 */
+.editor-surface #write .md-diagram-panel g.legend:nth-of-type(1) rect {
+    fill: #2f5a40 !important;
+    stroke: #2f5a40 !important;
+}
+.editor-surface #write .md-diagram-panel g.legend:nth-of-type(2) rect {
+    fill: #4a7c59 !important;
+    stroke: #4a7c59 !important;
+}
+.editor-surface #write .md-diagram-panel g.legend:nth-of-type(3) rect {
+    fill: #7dba8b !important;
+    stroke: #7dba8b !important;
+}
+.editor-surface #write .md-diagram-panel g.legend:nth-of-type(4) rect {
+    fill: #8fb39b !important;
+    stroke: #8fb39b !important;
+}
+.editor-surface #write .md-diagram-panel g.legend:nth-of-type(5) rect {
+    fill: #c2a878 !important;
+    stroke: #c2a878 !important;
+}
+.editor-surface #write .md-diagram-panel g.legend:nth-of-type(6) rect {
+    fill: #a09b6e !important;
+    stroke: #a09b6e !important;
+}
+.editor-surface #write .md-diagram-panel g.legend:nth-of-type(7) rect {
+    fill: #8b5fbf !important;
+    stroke: #8b5fbf !important;
+}
+.editor-surface #write .md-diagram-panel g.legend:nth-of-type(8) rect {
+    fill: #4a8fc4 !important;
+    stroke: #4a8fc4 !important;
+}
+.editor-surface #write .md-diagram-panel g.legend:nth-of-type(9) rect {
+    fill: #c4564a !important;
+    stroke: #c4564a !important;
+}
+.editor-surface #write .md-diagram-panel g.legend:nth-of-type(10) rect {
+    fill: #c8943a !important;
+    stroke: #c8943a !important;
+}
+.editor-surface #write .md-diagram-panel g.legend:nth-of-type(11) rect {
+    fill: #6b7a6f !important;
+    stroke: #6b7a6f !important;
+}
+.editor-surface #write .md-diagram-panel g.legend:nth-of-type(12) rect {
+    fill: #93a098 !important;
+    stroke: #93a098 !important;
+}
+
+/* ---------- 状态图 v2 ---------- */
+/* 状态节点矩形 */
+.editor-surface #write .md-diagram-panel .statediagram-state rect,
+.editor-surface #write .md-diagram-panel .state,
+.editor-surface #write .md-diagram-panel g.statediagram-state rect.basic {
+    fill: var(--bg-write) !important;
+    stroke: var(--accent-deep) !important;
+    stroke-width: 1.2px !important;
+}
+
+/* 起始 / 终止状态标记（实心圆）*/
+.editor-surface #write .md-diagram-panel .start-state,
+.editor-surface #write .md-diagram-panel .end-state,
+.editor-surface #write .md-diagram-panel circle.start-state,
+.editor-surface #write .md-diagram-panel circle.end-state,
+.editor-surface #write .md-diagram-panel .stateStart,
+.editor-surface #write .md-diagram-panel .stateEnd {
+    fill: var(--accent-deep) !important;
+    stroke: var(--accent-deep) !important;
+}
+
+/* 复合状态容器 */
+.editor-surface #write .md-diagram-panel .statediagram-cluster rect,
+.editor-surface #write .md-diagram-panel .composit,
+.editor-surface #write .md-diagram-panel rect.composit,
+.editor-surface #write .md-diagram-panel .statediagram-cluster.statediagram-cluster .inner {
+    fill: rgba(127, 190, 146, 0.05) !important;
+    stroke: var(--accent-soft) !important;
+    stroke-width: 1px !important;
+}
+
+/* fork / join 横竖条 */
+.editor-surface #write .md-diagram-panel .fork,
+.editor-surface #write .md-diagram-panel .join,
+.editor-surface #write .md-diagram-panel rect.fork,
+.editor-surface #write .md-diagram-panel rect.join {
+    fill: var(--accent-deep) !important;
+    stroke: var(--accent-deep) !important;
+}
+
+/* 选择 / 判断菱形 */
+.editor-surface #write .md-diagram-panel polygon.choice,
+.editor-surface #write .md-diagram-panel .choice {
+    fill: var(--bg-write) !important;
+    stroke: var(--accent-deep) !important;
+}
+
+/* 复合状态内部分隔线 */
+.editor-surface #write .md-diagram-panel .divider,
+.editor-surface #write .md-diagram-panel line.divider {
+    stroke: var(--accent-soft) !important;
+    stroke-width: 1px !important;
+}
+
+/* 转移箭头 */
+.editor-surface #write .md-diagram-panel .transition,
+.editor-surface #write .md-diagram-panel path.transition,
+.editor-surface #write .md-diagram-panel .statediagram-edge-thickness-normal,
+.editor-surface #write .md-diagram-panel .statediagram-edge-thickness-thick {
+    stroke: var(--accent) !important;
+    fill: none !important;
+}
+
+/* 状态图连线标签 */
+.editor-surface #write .md-diagram-panel .statediagram-edge-label {
+    fill: var(--fg-main) !important;
+    font-family: var(--font-body) !important;
+}
+
+/* 状态名文字 */
+.editor-surface #write .md-diagram-panel .stateLabel,
+.editor-surface #write .md-diagram-panel .stateLabel text {
+    fill: var(--fg-main) !important;
+    font-family: var(--font-body) !important;
+}
+
+/* cluster 标题（复合状态名）*/
+.editor-surface #write .md-diagram-panel .cluster-label,
+.editor-surface #write .md-diagram-panel .cluster-label text {
+    fill: var(--accent-deep) !important;
+    font-family: var(--font-body) !important;
+    font-weight: 700;
+}
+
+/* ---------- 甘特图 (Gantt) ---------- */
+/* 节区交替条纹 */
+.editor-surface #write .md-diagram-panel .section0,
+.editor-surface #write .md-diagram-panel .section2 {
+    fill: rgba(127, 190, 146, 0.05) !important;
+    stroke: none !important;
+}
+.editor-surface #write .md-diagram-panel .section1,
+.editor-surface #write .md-diagram-panel .section3 {
+    fill: rgba(127, 190, 146, 0.1) !important;
+    stroke: none !important;
+}
+
+/* 默认任务条 */
+.editor-surface #write .md-diagram-panel .task,
+.editor-surface #write .md-diagram-panel rect.task0,
+.editor-surface #write .md-diagram-panel rect.task1,
+.editor-surface #write .md-diagram-panel rect.task2,
+.editor-surface #write .md-diagram-panel rect.task3 {
+    fill: var(--accent) !important;
+    stroke: var(--accent-deep) !important;
+    stroke-width: 1px !important;
+}
+
+/* 已完成任务 — 更柔和 */
+.editor-surface #write .md-diagram-panel .done0,
+.editor-surface #write .md-diagram-panel .done1,
+.editor-surface #write .md-diagram-panel .done2,
+.editor-surface #write .md-diagram-panel .done3 {
+    fill: var(--accent-soft) !important;
+    stroke: var(--accent) !important;
+}
+
+/* 进行中任务 — 暖金（取自风景中的阳光）*/
+.editor-surface #write .md-diagram-panel .active0,
+.editor-surface #write .md-diagram-panel .active1,
+.editor-surface #write .md-diagram-panel .active2,
+.editor-surface #write .md-diagram-panel .active3 {
+    fill: var(--accent-warm) !important;
+    stroke: #a08456 !important;
+}
+
+/* 关键任务 — 警告红 */
+.editor-surface #write .md-diagram-panel .crit0,
+.editor-surface #write .md-diagram-panel .crit1,
+.editor-surface #write .md-diagram-panel .crit2,
+.editor-surface #write .md-diagram-panel .crit3 {
+    fill: #c4564a !important;
+    stroke: #8a3a31 !important;
+}
+
+/* 任务文字 — 正文字体 + 主题色（mermaid 自动决定的内 / 外位置保留）*/
+.editor-surface #write .md-diagram-panel .taskText,
+.editor-surface #write .md-diagram-panel .taskText0,
+.editor-surface #write .md-diagram-panel .taskText1,
+.editor-surface #write .md-diagram-panel .taskText2,
+.editor-surface #write .md-diagram-panel .taskText3,
+.editor-surface #write .md-diagram-panel .taskTextOutsideLeft,
+.editor-surface #write .md-diagram-panel .taskTextOutsideRight,
+.editor-surface #write .md-diagram-panel .taskTextOutsideLeft0,
+.editor-surface #write .md-diagram-panel .taskTextOutsideLeft1,
+.editor-surface #write .md-diagram-panel .taskTextOutsideLeft2,
+.editor-surface #write .md-diagram-panel .taskTextOutsideLeft3,
+.editor-surface #write .md-diagram-panel .taskTextOutsideRight0,
+.editor-surface #write .md-diagram-panel .taskTextOutsideRight1,
+.editor-surface #write .md-diagram-panel .taskTextOutsideRight2,
+.editor-surface #write .md-diagram-panel .taskTextOutsideRight3 {
+    fill: var(--fg-main) !important;
+    font-family: var(--font-body) !important;
+}
+
+/* 落在任务条上的文字 — 在绿底上保证可读 */
+.editor-surface #write .md-diagram-panel .taskText0,
+.editor-surface #write .md-diagram-panel .taskText1,
+.editor-surface #write .md-diagram-panel .taskText2,
+.editor-surface #write .md-diagram-panel .taskText3 {
+    fill: var(--bg-write) !important;
+}
+
+/* 节区标签（左侧）*/
+.editor-surface #write .md-diagram-panel .sectionTitle,
+.editor-surface #write .md-diagram-panel .sectionTitle0,
+.editor-surface #write .md-diagram-panel .sectionTitle1,
+.editor-surface #write .md-diagram-panel .sectionTitle2,
+.editor-surface #write .md-diagram-panel .sectionTitle3 {
+    fill: var(--accent-deep) !important;
+    font-family: var(--font-body) !important;
+    font-weight: 700 !important;
+}
+
+/* "今天"标记 — 深绿实线纵线 */
+.editor-surface #write .md-diagram-panel .today,
+.editor-surface #write .md-diagram-panel .todayMarker {
+    stroke: var(--accent-deep) !important;
+    stroke-width: 2px !important;
+    stroke-dasharray: none !important;
+    fill: none !important;
+}
+
+/* 网格线与刻度 */
+.editor-surface #write .md-diagram-panel .grid .tick line,
+.editor-surface #write .md-diagram-panel .grid :is(line, path) {
+    stroke: rgba(127, 190, 146, 0.18) !important;
+    stroke-width: 1px !important;
+}
+
+/* 轴标签（日期）*/
+.editor-surface #write .md-diagram-panel .grid .tick text,
+.editor-surface #write .md-diagram-panel .tick text {
+    fill: var(--fg-muted) !important;
+    font-family: var(--font-body) !important;
+}
+
+/* 语法配色 — 参考图 2（深底紫色关键字）
+   全部 !important，保证选中包裹时颜色仍然生效 */
+.editor-surface :is(.cm-s-inner, .md-fences) :is(.cm-keyword, .hljs-keyword),
+.editor-surface .cm-s-typora-default :is(.cm-keyword, .hljs-keyword) {
+    color: var(--cm-keyword) !important;
+}
+.editor-surface :is(.cm-s-inner, .md-fences) :is(.cm-atom, .hljs-literal),
+.editor-surface .cm-s-typora-default :is(.cm-atom, .hljs-literal) {
+    color: var(--cm-tag) !important;
+}
+.editor-surface :is(.cm-s-inner, .md-fences) :is(.cm-number, .hljs-number),
+.editor-surface .cm-s-typora-default :is(.cm-number, .hljs-number) {
+    color: var(--cm-number) !important;
+}
+.editor-surface :is(.cm-s-inner, .md-fences) :is(.cm-string, .hljs-string),
+.editor-surface .cm-s-typora-default :is(.cm-string, .hljs-string) {
+    color: var(--cm-string) !important;
+}
+.editor-surface :is(.cm-s-inner, .md-fences) .cm-string-2,
+.editor-surface .cm-s-typora-default .cm-string-2 {
+    color: var(--cm-string) !important;
+}
+.editor-surface :is(.cm-s-inner, .md-fences) :is(.cm-comment, .hljs-comment, .hljs-code),
+.editor-surface .cm-s-typora-default :is(.cm-comment, .hljs-comment, .hljs-code) {
+    color: var(--cm-comment) !important;
+    font-style: italic;
+}
+.editor-surface :is(.cm-s-inner, .md-fences) :is(.cm-variable, .hljs-variable),
+.editor-surface .cm-s-typora-default :is(.cm-variable, .hljs-variable) {
+    color: var(--cm-variable) !important;
+}
+.editor-surface :is(.cm-s-inner, .md-fences) :is(.cm-variable-2, .hljs-params),
+.editor-surface .cm-s-typora-default :is(.cm-variable-2, .hljs-params) {
+    color: var(--cm-variable) !important;
+}
+.editor-surface :is(.cm-s-inner, .md-fences) .cm-variable-3,
+.editor-surface .cm-s-typora-default .cm-variable-3 {
+    color: var(--cm-type) !important;
+}
+.editor-surface :is(.cm-s-inner, .md-fences) :is(.cm-def, .hljs-title),
+.editor-surface .cm-s-typora-default :is(.cm-def, .hljs-title) {
+    color: var(--cm-def) !important;
+}
+.editor-surface :is(.cm-s-inner, .md-fences) :is(.cm-property, .hljs-attr, .hljs-property),
+.editor-surface .cm-s-typora-default :is(.cm-property, .hljs-attr, .hljs-property) {
+    color: var(--cm-property) !important;
+}
+.editor-surface :is(.cm-s-inner, .md-fences) :is(.cm-operator, .hljs-operator),
+.editor-surface .cm-s-typora-default :is(.cm-operator, .hljs-operator) {
+    color: var(--cm-operator) !important;
+}
+.editor-surface :is(.cm-s-inner, .md-fences) :is(.cm-meta, .hljs-meta),
+.editor-surface .cm-s-typora-default :is(.cm-meta, .hljs-meta) {
+    color: var(--cm-meta) !important;
+}
+.editor-surface :is(.cm-s-inner, .md-fences) :is(.cm-tag, .hljs-tag),
+.editor-surface .cm-s-typora-default :is(.cm-tag, .hljs-tag) {
+    color: var(--cm-tag) !important;
+}
+.editor-surface :is(.cm-s-inner, .md-fences) :is(.cm-attribute, .hljs-attribute),
+.editor-surface .cm-s-typora-default :is(.cm-attribute, .hljs-attribute) {
+    color: var(--cm-attr) !important;
+}
+.editor-surface :is(.cm-s-inner, .md-fences) :is(.cm-builtin, .hljs-built_in),
+.editor-surface .cm-s-typora-default :is(.cm-builtin, .hljs-built_in) {
+    color: var(--cm-type) !important;
+}
+.editor-surface :is(.cm-s-inner, .md-fences) .cm-qualifier,
+.editor-surface .cm-s-typora-default .cm-qualifier {
+    color: var(--cm-def) !important;
+}
+.editor-surface :is(.cm-s-inner, .md-fences) :is(.cm-header, .hljs-section),
+.editor-surface .cm-s-typora-default :is(.cm-header, .hljs-section) {
+    color: var(--cm-keyword) !important;
+}
+.editor-surface :is(.cm-s-inner, .md-fences) .cm-link,
+.editor-surface .cm-s-typora-default .cm-link {
+    color: var(--cm-tag) !important;
+}
+.editor-surface :is(.cm-s-inner, .md-fences) .cm-bracket,
+.editor-surface .cm-s-typora-default .cm-bracket {
+    color: var(--cm-bracket) !important;
+}
+.editor-surface :is(.cm-s-inner, .md-fences) .CodeMirror-matchingbracket {
+    color: var(--cm-bracket) !important;
+    text-decoration: underline;
+}
+
+/* ---------- 引用块 ---------- */
+.editor-surface #write blockquote {
+    background: var(--bg-quote);
+    color: var(--fg-main);
+    border: 1px solid rgba(127, 190, 146, 0.18);
+    border-left: 4px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 14px 20px;
+    margin: 0.9em 0;
+    box-shadow: var(--shadow-sm);
+    font-style: normal;
+}
+.editor-surface #write blockquote p {
+    margin: 0.4em 0;
+}
+.editor-surface #write blockquote blockquote {
+    border-color: rgba(127, 190, 146, 0.35);
+    border-left: 4px solid var(--accent-soft);
+    background: rgba(255, 255, 255, 0.45);
+    margin: 0.6em 0;
+}
+
+/* ---------- GitHub 风格警告块（Typora 原生） ----------
+   Typora 1.13+ 把 `> [!NOTE]` 渲染成 <blockquote class="md-alert md-alert-note">
+   内部含 .md-alert-text-container > svg + .md-alert-text 标题。
+*/
+.editor-surface #write .md-alert {
+    border-radius: var(--radius);
+    padding: 14px 20px;
+    margin: 0.9em 0;
+    border: 1px solid var(--alert-border, rgba(127, 190, 146, 0.2));
+    border-left: 4px solid var(--alert-accent, var(--accent)) !important;
+    background: var(--alert-bg, var(--bg-quote)) !important;
+    box-shadow: var(--shadow-sm);
+    color: var(--fg-main);
+}
+
+/* 标题行（图标 + 标签，如 "Note"、"Warning"）*/
+.editor-surface #write .md-alert .md-alert-text-container {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+.editor-surface #write .md-alert .md-alert-text-container svg {
+    fill: currentColor;
+    color: var(--alert-accent);
+    width: 1em;
+    height: 1em;
+}
+.editor-surface #write .md-alert .md-alert-text {
+    font-weight: 700;
+    margin: 0 !important;
+    line-height: 1.2;
+    color: var(--alert-accent) !important;
+    font-size: 0.98em;
+    letter-spacing: 0.02em;
+}
+
+/* 警告块内的正文段落 */
+.editor-surface #write .md-alert > p:last-child {
+    margin-bottom: 0;
+}
+
+/* 各类型变体 */
+/* 五种警告块在暗底上的配色（更亮的描边、更深的背景蒙层）*/
+.editor-surface #write .md-alert.md-alert-note {
+    --alert-accent: #7cb6e0;
+    --alert-bg: rgba(74, 143, 196, 0.1);
+    --alert-border: rgba(124, 182, 224, 0.45);
+}
+.editor-surface #write .md-alert.md-alert-tip {
+    --alert-accent: #7fbe92;
+    --alert-bg: rgba(127, 190, 146, 0.1);
+    --alert-border: rgba(127, 190, 146, 0.5);
+}
+.editor-surface #write .md-alert.md-alert-important {
+    --alert-accent: #c4a0e8;
+    --alert-bg: rgba(170, 130, 210, 0.1);
+    --alert-border: rgba(196, 160, 232, 0.45);
+}
+.editor-surface #write .md-alert.md-alert-warning {
+    --alert-accent: #e8c878;
+    --alert-bg: rgba(218, 189, 134, 0.1);
+    --alert-border: rgba(232, 200, 120, 0.45);
+}
+.editor-surface #write .md-alert.md-alert-caution {
+    --alert-accent: #e88a82;
+    --alert-bg: rgba(220, 110, 100, 0.1);
+    --alert-border: rgba(232, 138, 130, 0.45);
+}
+
+/* ---------- 列表 ---------- */
+.editor-surface #write ul,
+.editor-surface #write ol {
+    padding-left: 1.6em;
+}
+.editor-surface #write li {
+    margin: 0.25em 0;
+}
+.editor-surface #write ul > li::marker {
+    color: var(--accent);
+}
+.editor-surface #write ol > li::marker {
+    color: var(--accent-deep);
+    font-weight: 600;
+}
+
+/* 任务列表 */
+.editor-surface #write .task-list {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.editor-surface #write .vditor-task,
+.editor-surface #write .md-task-list-item {
+    position: relative;
+    padding-left: 2.1rem;
+    margin: 0.45rem 0;
+    list-style: none;
+}
+
+.editor-surface #write .vditor-task input[type="checkbox"],
+.editor-surface #write .md-task-list-item input[type="checkbox"] {
+    position: absolute;
+    left: 0;
+    top: 0.14em;
+    width: 1.3em;
+    height: 1.3em;
+    appearance: none;
+    -webkit-appearance: none;
+    border-radius: 6px;
+    border: 2px solid var(--accent);
+    background: transparent;
+    margin: 0;
+    display: inline-block;
+    vertical-align: middle;
+    cursor: pointer;
+    transition:
+        background-color 0.15s ease,
+        border-color 0.15s ease;
+}
+
+.editor-surface #write .vditor-task input[type="checkbox"]:checked,
+.editor-surface #write .md-task-list-item input[type="checkbox"]:checked {
+    background-color: var(--accent);
+    border-color: var(--accent);
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3.5 8.5l3 3 6-6' stroke='%23faf7ef' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 90%;
+}
+
+.editor-surface #write .vditor-task.vditor-task:where(:has(> input:checked, > p > input:checked)),
+.editor-surface #write .md-task-list-item.vditor-task:where(:has(> input:checked, > p > input:checked)) {
+    color: var(--fg-muted);
+    text-decoration: line-through;
+    text-decoration-color: var(--fg-faint);
+}
+
+/* ---------- 表格 ---------- */
+.editor-surface #write table {
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 0.9em 0;
+    background-color: var(--bg-write);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    font-size: 0.95em;
+    border: 2px solid var(--accent-deep);
+}
+.editor-surface #write thead {
+    background: var(--accent);
+    color: #faf7ef;
+}
+.editor-surface #write th {
+    padding: 10px 14px;
+    font-weight: 600;
+    text-align: left;
+    border-right: 1px solid rgba(255, 255, 255, 0.3);
+}
+.editor-surface #write td {
+    padding: 9px 14px;
+    border-top: 1px solid rgba(127, 190, 146, 0.38);
+    border-right: 1px solid rgba(127, 190, 146, 0.3);
+}
+.editor-surface #write tr > :last-child {
+    border-right: none;
+}
+.editor-surface #write tbody tr:nth-child(even) {
+    background-color: var(--bg-soft);
+}
+
+/* 移除表格单元格内段落的 margin — 之前导致行过高 */
+.editor-surface #write td p,
+.editor-surface #write th p,
+.editor-surface #write td > p:first-child,
+.editor-surface #write td > p:last-child,
+.editor-surface #write th > p:first-child,
+.editor-surface #write th > p:last-child {
+    margin: 0 !important;
+    line-height: 1.5;
+}
+
+/* ---------- 分隔线 ---------- */
+.editor-surface #write hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(
+        to right,
+        transparent,
+        var(--accent-soft) 30%,
+        var(--accent-soft) 70%,
+        transparent
+    );
+    margin: 2em 0;
+}
+
+/* ---------- 图片与图注 ---------- */
+.editor-surface #write img {
+    max-width: 100%;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    display: block;
+    margin: 0.6em auto;
+}
+.editor-surface #write figure {
+    margin: 0.9em 0;
+    text-align: center;
+}
+.editor-surface #write figcaption {
+    color: var(--fg-muted);
+    font-size: 0.9em;
+    margin-top: 0.4em;
+}
+
+/* ---------- 数学公式 ---------- */
+/* 行间公式 — 圆角阴影卡片（参考图 3）*/
+/* 只给最外层加样式，否则嵌套层会造成双框 */
+.editor-surface #write .md-math-block,
+.editor-surface .md-math-block {
+    background: var(--bg-formula);
+    border: 1px solid rgba(194, 168, 120, 0.25);
+    border-radius: var(--radius);
+    padding: 18px 22px;
+    margin: 0.9em auto;
+    box-shadow: var(--shadow);
+    text-align: center;
+    overflow-x: auto;
+}
+
+/* 清除内层公式包装的样式，避免它们自己画框 */
+.editor-surface #write .md-math-block .md-math-container,
+.editor-surface #write .md-math-block .MathJax_Display,
+.editor-surface #write .md-math-block .MathJax_SVG_Display,
+.editor-surface #write .md-math-block .MathJax,
+.editor-surface #write .md-math-block .MathJax_SVG {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* 选中 / 聚焦的公式块 */
+.editor-surface #write .md-math-block.md-focus {
+    box-shadow: var(--shadow-lg);
+    border-color: rgba(127, 190, 146, 0.35);
+}
+
+/* 公式源码编辑区 */
+.editor-surface #write .md-math-block .md-rawblock-input,
+.editor-surface #write .md-rawblock-input {
+    background: transparent;
+    color: var(--accent-deep);
+    font-family: var(--font-mono);
+}
+
+/* $$ 分隔条 — 浅色蒙层 + 圆角 */
+.editor-surface #write .md-math-block .md-rawblock-before,
+.editor-surface #write .md-math-block .md-rawblock-after {
+    background: rgba(127, 190, 146, 0.05) !important;
+    color: var(--accent-deep) !important;
+    font-family: var(--font-mono) !important;
+    border-radius: 6px !important;
+    margin: 4px 0 !important;
+    padding: 4px 8px !important;
+}
+
+/* 中间源码编辑区 — 更深的蒙层 */
+.editor-surface #write .md-math-block .md-rawblock-input,
+.editor-surface #write .md-math-block .md-mathblock-input {
+    background: rgba(127, 190, 146, 0.14) !important;
+    border-radius: 6px !important;
+    padding: 6px 4px !important;
+}
+
+/* 内部 CodeMirror 设为透明，让父层的绿色蒙层透上来 */
+.editor-surface #write .md-math-block .CodeMirror,
+.editor-surface #write .md-math-block .CodeMirror-scroll,
+.editor-surface #write .md-math-block .CodeMirror-sizer,
+.editor-surface #write .md-math-block .CodeMirror-lines,
+.editor-surface #write .md-math-block .CodeMirror-gutters {
+    background: transparent !important;
+}
+
+/* 行号与源码之间更深的分隔线 */
+.editor-surface #write .md-math-block .CodeMirror-gutters {
+    border-right: 1.5px solid var(--accent) !important;
+}
+
+/* 行内公式 */
+.editor-surface #write .md-inline-math {
+    color: var(--fg-heading);
+    padding: 0 2px;
+}
+
+/* MathJax 字色覆盖（米色底上的暖色）*/
+.editor-surface #write .MathJax,
+.editor-surface #write .MathJax_SVG {
+    color: var(--fg-heading) !important;
+}
+
+/* CJK inside MathJax — fall back to LXGW WenKai so 中文 in \text {} matches body */
+.editor-surface #write .MathJax text,
+.editor-surface #write .MathJax_SVG text,
+.editor-surface #write .MathJax_Display text,
+.editor-surface #write .md-math-block text,
+.editor-surface #write .md-math-block foreignObject {
+    font-family: var(--font-body) !important;
+}
+.editor-surface #write .md-inline-math .MathJax text {
+    font-family: var(--font-body) !important;
+}
+
+/* ---------- 脚注 ---------- */
+.editor-surface #write .md-footnote {
+    background: var(--bg-soft);
+    color: var(--accent-deep);
+    border-radius: var(--radius-sm);
+    padding: 0 4px;
+    font-size: 0.85em;
+}
+
+/* ---------- 文档头 / YAML ---------- */
+.editor-surface #write pre.md-meta-block {
+    background: var(--bg-soft);
+    color: var(--fg-muted);
+    border: 1px dashed rgba(127, 190, 146, 0.3);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-family: var(--font-body);
+    font-size: 16px;
+    box-shadow: none;
+}
+
+/* ---------- 目录 ---------- */
+.editor-surface .md-toc {
+    background: var(--bg-soft);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    border-left: 3px solid var(--accent);
+}
+.editor-surface .md-toc-content {
+    font-size: 0.95em;
+}
+
+/* ---------- 搜索 / 查找 ---------- */
+.editor-surface #md-searchpanel,
+.editor-surface .searchpanel-search-option-btn {
+    background: var(--bg-write);
+    color: var(--fg-main);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+/* ---------- 文字选中 ---------- */
+/* 只改背景色，不覆盖文字色 — 保留原色（含语法高亮）*/
+.editor-surface ::selection {
+    background: rgba(127, 190, 146, 0.25);
+}
+
+/* 表头是绿色底色 — 正文选中色会被淹没。
+   用浅色蒙层 + 深色文字让选中可见 */
+.editor-surface #write th::selection,
+.editor-surface #write th *::selection {
+    background: rgba(255, 255, 255, 0.45);
+    color: var(--accent-deep);
+}
+
+/* 代码块内 CodeMirror 自带 .CodeMirror-selected 高亮层。
+   把浏览器原生 ::selection 设为透明，避免叠出"双层框" */
+.editor-surface #write pre ::selection,
+.editor-surface .md-fences ::selection,
+.editor-surface .md-fences *::selection,
+.editor-surface .md-fences .CodeMirror ::selection,
+.editor-surface .md-fences .CodeMirror *::selection,
+.editor-surface .md-fences .CodeMirror-line::selection,
+.editor-surface .md-fences .CodeMirror-line ::selection,
+.editor-surface .md-fences .CodeMirror-line *::selection,
+.editor-surface .md-fences pre::selection,
+.editor-surface .md-fences pre ::selection,
+.editor-surface .md-fences span::selection {
+    background: transparent !important;
+    background-color: transparent !important;
+    color: inherit !important;
+    text-shadow: none !important;
+}
+
+/* ---------- 滚动条 ---------- */
+.editor-surface ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+.editor-surface ::-webkit-scrollbar-track {
+    background: transparent;
+}
+.editor-surface ::-webkit-scrollbar-thumb {
+    background: rgba(127, 190, 146, 0.25);
+    border-radius: 5px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+.editor-surface ::-webkit-scrollbar-thumb:hover {
+    background: rgba(127, 190, 146, 0.45);
+    background-clip: padding-box;
+    border: 2px solid transparent;
+}
+
+.editor-surface .md-fences ::-webkit-scrollbar-thumb,
+.editor-surface #typora-source ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.18);
+    background-clip: padding-box;
+    border: 2px solid transparent;
+}
+
+/* ---------- 专注模式微调 ---------- */
+.editor-surface #write.first-line-indent p {
+    /* 保持默认行为 — 不强制首行缩进 */
+}
+
+.editor-surface .typora-export,
+.editor-surface .typora-export-content,
+.editor-surface.typora-export {
+    --bg-page: var(--bg-write) !important;
+}
+
+/* PDF 导出时让页面与内容同色，避免出现两层米色色差 */
+@media print {
+    .editor-surface,
+    .editor-surface,
+    .editor-surface #write,
+    .editor-surface .typora-export,
+    .editor-surface .typora-export-content,
+    .editor-surface .typora-export #write {
+        background: var(--bg-write) !important;
+        background-color: var(--bg-write) !important;
+    }
+    .editor-surface #write {
+        box-shadow: none;
+        max-width: none;
+        padding: 0;
+    }
+    .editor-surface #write pre,
+    .editor-surface #write .md-fences {
+        box-shadow: none;
+    }
+    .editor-surface #write .md-math-block {
+        box-shadow: none;
+    }
+}

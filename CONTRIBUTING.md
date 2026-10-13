@@ -37,7 +37,7 @@ npm run desktop    # 构建并启动桌面版
 
 - 使用 TypeScript（渲染进程）和 CommonJS（主进程），与周围代码保持一致的命名、注释密度和写法。
 - 渲染进程运行在沙箱中，只能通过 `electron/preload.cjs` 暴露的受限 IPC 访问文件；不要放宽 `contextIsolation`、`sandbox` 或页面 CSP。
-- 不要在仓库中加入 Typora 的程序代码、素材或内置主题，也不要加入许可证不明的第三方主题。
+- 主题资源仅纳入已选定的 8 个主题 CSS 及其依赖，保留主题说明和可用的字体许可证；不要加入 Typora 的程序代码或与主题无关的应用素材。
 - 保存逻辑要保证“不修改就不改变文件”：未编辑的内容必须逐字节保留（见 `src/preserve.mjs` 和 `tests/save-preserve.mjs`）。
 
 ## 测试
@@ -54,7 +54,7 @@ npm run build
 | 修改范围 | 测试 |
 | --- | --- |
 | 文件读写、模式切换、保存 | `node tests/desktop.mjs`、`node tests/save-preserve.mjs` |
-| 渲染、主题、图表、公式 | `node tests/rendering.mjs`、`node tests/render-details.mjs`、`node tests/theme-rendering.mjs` |
+| 渲染、主题、图表、公式 | `node tests/rendering.mjs`、`node tests/render-details.mjs`、`node tests/theme-rendering.mjs`、`node tests/bundled-themes.mjs` |
 | 菜单与格式操作 | `node tests/formatting.mjs`、`node tests/table-dialog.mjs` |
 | 源码模式 | `node tests/source-sync.mjs`、`node tests/code-editing.mjs` |
 | 导出 | `node tests/export.mjs` |

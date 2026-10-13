@@ -1,14 +1,31 @@
-# Local theme bundle
+# Bundled themes
 
-`npm run themes:bundle -- "C:\Users\root\AppData\Roaming\Typora\themes"`
-adds the top-level CSS themes from that directory to a local installer. Fonts,
-images and CSS imports are embedded for offline use; available font/license
-notices are copied into `licenses/`. The original theme directory is unchanged.
+The following eight user-selected themes ship with Itypora, in addition to
+its three original colour schemes:
 
-Generated `manifest.json`, CSS and notices are ignored by Git. They are local,
-user-provided assets, retain their original licenses and are not relicensed
-under Itypora's MIT license. This directory remains optional: a build without
-a generated manifest includes only Itypora's three original themes.
+- Clarity Dark (`clarity-dark.css`)
+- Clarity (`clarity.css`)
+- GitHub (`github.css`)
+- Light Mind Dark (`lightmind-dark.css`)
+- Light Mind (`lightmind.css`)
+- Matcha Dark (`matcha-dark.css`)
+- Matcha (`matcha.css`)
+- MorandiGarden (`morandigarden.css`)
+
+The compiled CSS, `manifest.json` and available font/license notices in
+`licenses/` are committed so GitHub Actions can package them on every platform
+without accessing a developer's local Typora installation. Fonts, images and
+CSS imports are embedded for offline use. These themes retain their original
+licenses and are not relicensed under Itypora's MIT license.
+
+To regenerate these eight themes from an updated source directory:
+
+```sh
+npm run themes:bundle -- "C:\path\to\Typora\themes"
+```
+
+The bundler requires all eight entry CSS files, removes obsolete generated CSS
+from this directory and leaves the source directory unchanged.
 
 Bundled themes are installed as editable user copies. Upgrades add new themes,
 preserve existing files/selections and do not restore themes the user deleted.

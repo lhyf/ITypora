@@ -8,7 +8,8 @@
 
 ### 新增
 
-- 本地主题打包：`npm run themes:bundle -- "主题目录"` 将主题的 CSS、字体、图片内嵌为离线主题，随安装包提供；安装或升级自动补充新主题，保留已有自定义文件、主题选择和删除状态。
+- 内置 8 个附加主题：Clarity / Clarity Dark、GitHub、Light Mind / Light Mind Dark、Matcha / Matcha Dark、MorandiGarden，连同素纸、暖砂、夜读共 11 个。主题及其字体、图片作为离线资源纳入仓库，本地和 GitHub 自动打包均包含。
+- 主题资源更新：`npm run themes:bundle -- "主题目录"` 重新生成这 8 个主题；安装或升级自动补充新主题，保留已有自定义文件、主题选择和删除状态。
 
 ### 调整
 

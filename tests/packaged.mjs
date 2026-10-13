@@ -15,6 +15,14 @@ try {
   expect(await app.evaluate(({ app }) => app.isPackaged)).toBe(true);
   const version = JSON.parse(await fs.readFile('package.json', 'utf8')).version;
   expect(await app.evaluate(({ app }) => app.getVersion())).toBe(version);
+  const bundled = JSON.parse(await fs.readFile('resources/themes/manifest.json', 'utf8'));
+  const packagedThemes = await page.evaluate(async () => {
+    const snapshot = await window.desktop.preferencesCommand('get');
+    return { ids: snapshot.themes.map(theme => theme.id), errors: snapshot.themeErrors };
+  });
+  expect(packagedThemes.errors).toEqual([]);
+  expect(packagedThemes.ids.length).toBe(bundled.themes.length + 3);
+  for (const theme of bundled.themes) expect(packagedThemes.ids).toContain(theme.id);
   const menu = id => app.evaluate(({ Menu, BrowserWindow }, command) => new Promise(resolve => {
     const window = BrowserWindow.getAllWindows()[0];
     window.webContents.ipc.once('action-complete', () => resolve());
