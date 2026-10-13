@@ -35,7 +35,7 @@ try {
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'sepia');
   await expect(prefs.locator('#current-theme')).toHaveValue('sepia');
   await expect(page.locator('#preferences')).toHaveCSS('background-color', 'rgb(248, 243, 231)');
-  await prefs.locator('#current-theme').selectOption('night');
+  await prefs.locator('#current-theme').selectOption({ value: 'night' });
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'night');
   await expect(page.locator('#preferences')).toHaveCSS('background-color', 'rgb(37, 43, 41)');
   await expect(page.locator('#preferences')).toHaveCSS('color', 'rgb(200, 208, 200)');

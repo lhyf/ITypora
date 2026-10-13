@@ -26,7 +26,7 @@ async function importTheme(file) {
   async function read(target) {
     if (cache.has(target)) return cache.get(target);
     const stat = await fs.stat(target);
-    if (stat.size > 8 * 1024 * 1024 || totalBytes + stat.size > 20 * 1024 * 1024) throw new Error('主题资源超过大小限制（单文件 8 MB，总计 20 MB）');
+    if (stat.size > 16 * 1024 * 1024 || totalBytes + stat.size > 20 * 1024 * 1024) throw new Error('主题资源超过大小限制（单文件 16 MB，总计 20 MB）');
     totalBytes += stat.size;
     const bytes = await fs.readFile(target);
     cache.set(target, bytes);

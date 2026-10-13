@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#80a172"/>
+      <stop offset="1" stop-color="#4a6641"/>
+    </linearGradient>
+    <linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".16"/>
+      <stop offset=".45" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="tile-shadow" x="-10%" y="-10%" width="120%" height="125%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#000" flood-opacity=".25"/>
+    </filter>
+    <filter id="paper-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#1c3017" flood-opacity=".32"/>
+    </filter>
+  </defs>
+  <g transform="translate(24 24) scale(1.1844660194174756)">
+    <rect width="824" height="824" rx="185" fill="url(#tile)"/>
+    <rect width="824" height="824" rx="185" fill="url(#sheen)"/>
+    <g filter="url(#paper-shadow)">
+      <path d="M200,112 H548 L652,216 V684 A28,28 0 0 1 624,712 H200 A28,28 0 0 1 172,684 V140 A28,28 0 0 1 200,112 Z" fill="#fbfaf5"/>
+      <path d="M548,112 V194 A22,22 0 0 0 570,216 H652 Z" fill="#e1e7da"/>
+    </g>
+    <g transform="translate(0 14)">
+    <g stroke="#58754e" stroke-width="15" stroke-linecap="round">
+      <path d="M262,196 L250,270 M298,196 L286,270 M238,218 H312 M234,250 H308"/>
+    </g>
+    <rect x="338" y="213" width="224" height="40" rx="20" fill="#33402f"/>
+    <g fill="#d3d9cd"><rect x="236" y="318" width="352" height="24" rx="12"/><rect x="236" y="370" width="312" height="24" rx="12"/><rect x="236" y="422" width="336" height="24" rx="12"/><rect x="236" y="532" width="150" height="24" rx="12"/></g>
+    <g fill="#58754e">
+      <rect x="420" y="496" width="20" height="96" rx="4"/>
+      <rect x="400" y="490" width="60" height="16" rx="8"/>
+      <rect x="400" y="582" width="60" height="16" rx="8"/>
+    </g>
+    </g>
+  </g>
+</svg>

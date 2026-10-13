@@ -1,6 +1,6 @@
 {
   "name": "itypora",
-  "version": "0.4.0",
+  "version": "0.4.2",
   "private": true,
   "description": "A local-first Markdown desktop editor",
   "keywords": [
@@ -25,17 +25,21 @@
   "main": "electron/main.cjs",
   "scripts": {
     "assets": "node scripts/assets.mjs",
+    "icon": "electron scripts/icon.mjs",
+    "themes:bundle": "node scripts/bundle-themes.mjs",
     "dev": "npm run assets && vite --host 127.0.0.1",
     "desktop": "npm run build && electron .",
     "build": "npm run assets && tsc --noEmit && vite build",
     "test": "node --test tests/*.test.cjs",
     "test:desktop": "npm run build && node tests/desktop.mjs",
+    "test:drop": "npm run build && node tests/drop-open.mjs",
     "test:interface": "npm run build && node tests/interface.mjs",
     "test:preferences": "npm run build && node tests/preferences.mjs",
     "test:formatting": "npm run build && node tests/formatting.mjs",
     "test:table-dialog": "npm run build && node tests/table-dialog.mjs",
     "test:rendering": "npm run build && node tests/rendering.mjs",
     "test:theme-rendering": "npm run build && node tests/theme-rendering.mjs",
+    "test:bundled-themes": "npm run build && node tests/bundled-themes.mjs",
     "test:render-details": "npm run build && node tests/render-details.mjs",
     "test:code-editing": "npm run build && node tests/code-editing.mjs",
     "test:render-audit": "npm run build && node tests/render-audit.mjs after --all",
@@ -85,7 +89,8 @@
     ],
     "extraResources": [
       "LICENSE",
-      "THIRD_PARTY_NOTICES.md"
+      "THIRD_PARTY_NOTICES.md",
+      { "from": "resources/themes", "to": "themes" }
     ],
     "asar": true,
     "publish": null,
@@ -103,7 +108,8 @@
             "x64"
           ]
         }
-      ]
+      ],
+      "icon": "build/icon.png"
     },
     "nsis": {
       "oneClick": false,
@@ -133,7 +139,8 @@
       ],
       "category": "public.app-category.productivity",
       "identity": "-",
-      "hardenedRuntime": false
+      "hardenedRuntime": false,
+      "icon": "build/icon-mac.png"
     },
     "linux": {
       "target": [
@@ -152,7 +159,8 @@
       ],
       "category": "Office",
       "synopsis": "Local-first Markdown editor",
-      "maintainer": "Itypora contributors <https://github.com/lhyf/ITypora>"
+      "maintainer": "Itypora contributors <https://github.com/lhyf/ITypora>",
+      "icon": "build/icon.png"
     }
   }
 }

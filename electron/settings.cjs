@@ -25,8 +25,9 @@ function sanitize(update) {
   return result;
 }
 
-function createSettingsStore(root) {
+function createSettingsStore(root, bundledFolder = null) {
   const folder = path.join(root, 'themes');
+  let bundledThemes = [];
   let settings = { ...defaults }, themes = [], errors = [], initialized = false, baseCss = '';
   async function read(name, fallback) { try { return JSON.parse(await fs.readFile(path.join(root, name), 'utf8')); } catch { return fallback; } }
   const snapshot = () => ({ settings: { ...settings }, themes: themes.map(theme => ({ ...theme })), themeFolder: folder, themeErrors: [...errors], initialized, baseCss });
@@ -51,7 +52,7 @@ function createSettingsStore(root) {
         const override = path.join(folder, `${entry.name.slice(0, -4)}.user.css`);
         let custom = '';
         if (await fs.access(override).then(() => true, () => false)) custom = (await importTheme(override)).css;
-        next.push({ ...theme, id: previous?.id || defaultThemes.find(item => item.fileName === entry.name)?.id || `file:${entry.name}`, fileName: entry.name, css: `${theme.css}\n${baseCss}\n${custom}` });
+        next.push({ ...theme, id: previous?.id || defaultThemes.find(item => item.fileName === entry.name)?.id || bundledThemes.find(item => item.fileName === entry.name)?.id || `file:${entry.name}`, fileName: entry.name, css: `${theme.css}\n${baseCss}\n${custom}` });
       } catch (error) { errors.push(`${entry.name}：${error.message}`); if (previous) next.push(previous); }
     }
     themes = next;
@@ -68,6 +69,21 @@ function createSettingsStore(root) {
         await fs.writeFile(path.join(folder, theme.fileName), theme.css, { flag: 'wx' }).catch(error => { if (error.code !== 'EEXIST') throw error; });
       }
       await atomicWrite(defaultsMarker, '1');
+    }
+    if (bundledFolder) {
+      const manifest = await fs.readFile(path.join(bundledFolder, 'manifest.json'), 'utf8').then(JSON.parse).catch(error => { if (error.code === 'ENOENT') return { themes: [] }; throw error; });
+      if (!Array.isArray(manifest.themes) || manifest.themes.some(theme => typeof theme.id !== 'string' || !/^builtin:[\w.-]+$/.test(theme.id) || typeof theme.fileName !== 'string' || !/^[\w.-]+\.css$/.test(theme.fileName))) throw new Error('内置主题清单无效');
+      bundledThemes = manifest.themes;
+      const marker = await read('bundled-themes-installed.json', []);
+      const installed = new Set(Array.isArray(marker) ? marker.filter(id => typeof id === 'string') : []);
+      for (const theme of bundledThemes) {
+        if (installed.has(theme.id)) continue;
+        const css = await fs.readFile(path.join(bundledFolder, theme.fileName), 'utf8');
+        // Add new bundled themes on upgrade, preserving existing edits and imports.
+        await fs.writeFile(path.join(folder, theme.fileName), css, { flag: 'wx' }).catch(error => { if (error.code !== 'EEXIST') throw error; });
+        installed.add(theme.id);
+      }
+      await atomicWrite(path.join(root, 'bundled-themes-installed.json'), JSON.stringify([...installed]));
     }
     const stored = await read('preferences.json', null);
     initialized = stored !== null; settings = { ...defaults, ...sanitize(stored) };

@@ -100,7 +100,7 @@ try {
 
   await menu('appearance');
   prefs = await preferencesPage();
-  await prefs.locator('#current-theme').selectOption('night');
+  await prefs.locator('#current-theme').selectOption({ value: 'night' });
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'night');
   await prefs.locator('#close').click();
   await page.screenshot({ path: 'test-results/desktop-night.png' });

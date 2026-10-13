@@ -1,3 +1,5 @@
+<img src="build/icon-mac.png" alt="Itypora icon" width="112" align="right">
+
 # Itypora
 
 [![Build](https://github.com/lhyf/ITypora/actions/workflows/build.yml/badge.svg)](https://github.com/lhyf/ITypora/actions/workflows/build.yml)
@@ -50,6 +52,7 @@ The installers are not code-signed yet, so the system may block the first launch
 
 **Files and interface**
 
+- Drop a local Markdown / text file (`.md`, `.markdown`, `.mdown`, `.txt`) into the window to open it in any editing mode. Unsaved changes prompt you to save, discard or cancel. Open one file at a time.
 - Open a folder and browse its Markdown files as a list or grouped by directory; recent files, outline, find, word count.
 - Focus and typewriter modes; a resizable sidebar that remembers its width.
 - Native menus and an in-window preferences page (General, Appearance, Editor, Markdown) with search.
@@ -66,12 +69,14 @@ The installers are not code-signed yet, so the system may block the first launch
 
 Itypora imports CSS themes written for Typora and includes three colour schemes of its own.
 
+Use `npm run themes:bundle -- "theme directory"` to embed local themes, fonts and images in a personal installer. They appear in the Theme menu after installation or upgrade. Existing files, selected themes and user deletions are preserved.
+
 1. Keep the theme's file layout, e.g. `my-theme.css` and `my-theme/fonts/`.
 2. Choose *主题 (Theme) → 导入 CSS 主题… (Import CSS theme…)* and pick the entry `.css` file. Local `@import`s, images and fonts in the same folder or below are packed into a copy of the theme; the original files are not changed.
 3. Switch themes from the Theme menu or in *Preferences → Appearance*.
 4. `base.user.css` (the *Custom CSS* option) applies to every theme, and `<theme>.user.css` overrides a single theme.
 
-Themes are checked against Typora (Matcha and others), but pixel-identical rendering for every theme is not guaranteed. Remote `@import`s, fonts and images are skipped with a warning. Third-party themes are not distributed with Itypora; follow each theme's license.
+Themes are checked against Typora (Matcha and others), but pixel-identical rendering for every theme is not guaranteed. Remote `@import`s, fonts and images are skipped with a warning. Resources are limited to 16 MB per file and 20 MB per theme. Local bundles are excluded from the source repository and retain the themes' and fonts' own licenses.
 
 ## Files and data
 

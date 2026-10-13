@@ -1,4 +1,4 @@
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer, webUtils } = require('electron');
 
 contextBridge.exposeInMainWorld('desktop', {
   initialize: () => ipcRenderer.invoke('initialize'),
@@ -8,6 +8,8 @@ contextBridge.exposeInMainWorld('desktop', {
   savePreferences: update => ipcRenderer.invoke('save-preferences', update),
   onPreferences: callback => ipcRenderer.on('preferences-changed', (_event, value) => callback(value)),
   open: (file) => ipcRenderer.invoke('open', file),
+  // Resolve only native File objects; a renderer-created File has no disk path.
+  openDropped: (file) => ipcRenderer.invoke('open-dropped', webUtils.getPathForFile(file)),
   folder: () => ipcRenderer.invoke('folder'),
   newDocument: () => ipcRenderer.invoke('new-document'),
   save: (saveAs) => ipcRenderer.invoke('save', Boolean(saveAs)),

@@ -67,3 +67,47 @@ test('invalid custom CSS cannot overwrite valid CSS', async t => {
   assert.equal(await store.customCss(), '#write { color: purple }');
   assert.match(store.snapshot().baseCss, /purple/);
 });
+
+test('bundled themes migrate on upgrade without overwriting imports, selection, edits or deleted themes', async t => {
+  const root = await temporary(t), bundle = await temporary(t);
+  const original = createSettingsStore(root); await original.initialize();
+  await original.saveSettings({ theme: 'sepia' });
+  await fs.writeFile(path.join(original.folder, 'matcha.css'), '#write { color: purple; }');
+  await original.refresh();
+  const importedId = original.snapshot().themes.find(theme => theme.name === 'matcha').id;
+  const themes = [
+    { id: 'builtin:matcha', fileName: 'matcha.css' },
+    { id: 'builtin:night', fileName: 'night.css' }
+  ];
+  await fs.writeFile(path.join(bundle, 'matcha.css'), '#write { color: green; }');
+  await fs.writeFile(path.join(bundle, 'night.css'), ':root { --bg-color: black; }');
+  const manifest = () => fs.writeFile(path.join(bundle, 'manifest.json'), JSON.stringify({ themes }));
+  await manifest();
+  const upgraded = createSettingsStore(root, bundle); let value = await upgraded.initialize();
+  assert.equal(value.settings.theme, 'sepia');
+  assert.equal(value.themes.find(theme => theme.name === 'matcha').id, importedId);
+  assert.match(value.themes.find(theme => theme.name === 'matcha').css, /purple/);
+  assert.ok(value.themes.some(theme => theme.id === 'night'));
+  assert.ok(value.themes.some(theme => theme.id === 'builtin:night'));
+  await upgraded.saveSettings({ theme: 'builtin:night' });
+  await fs.writeFile(path.join(upgraded.folder, 'night.css'), ':root { --bg-color: gray; }');
+  await fs.rm(path.join(upgraded.folder, 'matcha.css'));
+  themes.push({ id: 'builtin:clarity', fileName: 'clarity.css' });
+  await fs.writeFile(path.join(bundle, 'clarity.css'), '#write { color: blue; }');
+  await manifest();
+  value = await createSettingsStore(root, bundle).initialize();
+  assert.equal(value.settings.theme, 'builtin:night');
+  assert.match(value.themes.find(theme => theme.id === 'builtin:night').css, /gray/);
+  assert.ok(!value.themes.some(theme => theme.name === 'matcha'));
+  assert.ok(value.themes.some(theme => theme.id === 'builtin:clarity'));
+  await fs.writeFile(path.join(upgraded.folder, 'clarity.user.css'), '#write { color: red; }');
+  value = await createSettingsStore(root, bundle).initialize();
+  const css = value.themes.find(theme => theme.id === 'builtin:clarity').css;
+  assert.ok(css.indexOf('blue') < css.indexOf('red'));
+});
+
+test('bundled manifest cannot install CSS from outside its directory', async t => {
+  const root = await temporary(t), bundle = await temporary(t);
+  await fs.writeFile(path.join(bundle, 'manifest.json'), JSON.stringify({ themes: [{ id: 'builtin:escape', fileName: '../escape.css' }] }));
+  await assert.rejects(createSettingsStore(root, bundle).initialize(), /内置主题清单无效/);
+});

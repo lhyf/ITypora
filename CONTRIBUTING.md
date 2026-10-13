@@ -28,7 +28,8 @@ npm run desktop    # 构建并启动桌面版
 | --- | --- |
 | `electron/` | 主进程：窗口、菜单、IPC、文件读写、主题编译、导出、本地图片协议 |
 | `src/` | 渲染进程：编辑器挂载、渲染修饰（`rendering.ts`）、源码模式、导出（`export.ts`）、放大查看、样式 |
-| `scripts/` | 资源准备、Vditor 构建时补丁（`vditor-patch.mjs`） |
+| `scripts/` | 资源准备、Vditor 构建时补丁（`vditor-patch.mjs`）、图标生成（`icon.mjs`） |
+| `build/` | 应用图标：`icon.png`（Windows、Linux）和 `icon-mac.png`（macOS），由 `npm run icon` 从 `scripts/icon.mjs` 生成，同时更新窗口图标 `electron/icon.png` |
 | `tests/` | `*.test.cjs` 为 Node 单元测试，其余 `*.mjs` 通过 Playwright 驱动真实 Electron 窗口 |
 | `examples/` | 完整格式样本 `Markdown兼容性与显示测试.md`，大部分渲染测试以它为依据 |
 

@@ -110,6 +110,14 @@ async function canReplace() {
   if (response === 0) return Boolean(await saveDocument());
   return true;
 }
+async function openDocument(file) {
+  if (!await canReplace()) return null;
+  const content = await readDocument(file);
+  state = { path: file, content, diskContent: content, dirty: false };
+  await remember(file);
+  await checkpoint();
+  return snapshot();
+}
 // Typora on Chinese Windows resolves generic sans-serif (e.g. Mermaid text,
 // CJK fallback of Latin-only stacks) to Microsoft YaHei; Chromium's own
 // default here is the Japanese Meiryo, with different glyphs and line height.
@@ -208,7 +216,7 @@ app.whenReady().then(async () => {
   if (!Array.isArray(recent)) recent = [];
   recent = recent.filter((value) => typeof value === 'string').slice(0, 12);
   allowedFiles = new Set(recent);
-  settingsStore = createSettingsStore(app.getPath('userData'));
+  settingsStore = createSettingsStore(app.getPath('userData'), path.join(app.isPackaged ? process.resourcesPath : path.join(__dirname, '..', 'resources'), 'themes'));
   themes = (await settingsStore.initialize()).themes;
   protocol.handle('itypora-asset', async (request) => {
     try {
@@ -220,6 +228,8 @@ app.whenReady().then(async () => {
   window = new BrowserWindow({
     width: 1000, height: 800, minWidth: 620, minHeight: 420,
     title: 'Itypora', backgroundColor: '#faf9f6', show: false,
+    // Windows and Linux window and taskbar icon (macOS uses the app bundle's); npm run icon draws it.
+    icon: path.join(__dirname, 'icon.png'),
     webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true, ...defaultFonts() }
   });
   window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
@@ -256,12 +266,13 @@ app.whenReady().then(async () => {
       if (result.canceled) return null;
       file = result.filePaths[0];
     }
-    if (!await canReplace()) return null;
-    const content = await readDocument(file);
-    state = { path: file, content, diskContent: content, dirty: false };
-    await remember(file);
-    await checkpoint();
-    return snapshot();
+    return openDocument(file);
+  });
+  handle('open-dropped', async (file) => {
+    if (typeof file !== 'string' || !path.isAbsolute(file) || !/\.(md|markdown|mdown|txt)$/i.test(file)) {
+      throw new Error('请拖入本地 Markdown 或文本文件（.md、.markdown、.mdown、.txt）。');
+    }
+    return openDocument(file);
   });
   handle('folder', async () => {
     const result = await dialog.showOpenDialog(window, { properties: ['openDirectory'] });

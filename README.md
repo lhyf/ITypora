@@ -1,3 +1,5 @@
+<img src="build/icon-mac.png" alt="Itypora 图标" width="112" align="right">
+
 # Itypora
 
 [![Build](https://github.com/lhyf/ITypora/actions/workflows/build.yml/badge.svg)](https://github.com/lhyf/ITypora/actions/workflows/build.yml)
@@ -51,6 +53,7 @@ Itypora 基于 Electron 与 Vditor 独立实现，使用自己的界面和素材
 
 **文件与界面**
 
+- 将本地 Markdown / 文本文件（`.md`、`.markdown`、`.mdown`、`.txt`）拖入打开的窗口即可打开，三种编辑模式均支持；当前文档有未保存修改时会先提示保存、放弃或取消。一次打开一个文件。
 - 打开文件夹，列表或目录分组浏览其中的 Markdown 文件；最近文档、文档大纲、文内查找、字数统计。
 - 专注模式、打字机模式；侧栏可拖动调宽，宽度重启后保留。
 - 七组原生菜单：文件、编辑、段落、格式、视图、主题、帮助。
@@ -66,7 +69,7 @@ Itypora 基于 Electron 与 Vditor 独立实现，使用自己的界面和素材
 
 ## 主题
 
-Itypora 可以导入为 Typora 编写的 CSS 正文主题，也自带素纸、暖砂、夜读三个配色。
+Itypora 可以导入为 Typora 编写的 CSS 正文主题，也自带素纸、暖砂、夜读三个配色。通过 `npm run themes:bundle -- "主题目录"` 可将本地主题及字体、图片内嵌到自用安装包，安装或升级后直接在主题菜单中选择。新增主题不会覆盖已有主题文件或当前选择；用户删除的主题不会在重启后重新出现。
 
 1. 保持主题原来的文件结构，例如 `my-theme.css`、`my-theme/fonts/`。
 2. 点击“主题 → 导入 CSS 主题…”，选择入口 `.css` 文件。本地 `@import`、同目录及子目录中的图片和字体会一起打包进主题副本，原文件不变。
@@ -74,7 +77,7 @@ Itypora 可以导入为 Typora 编写的 CSS 正文主题，也自带素纸、�
 4. “打开主题文件夹”可直接管理 Itypora 用户数据目录中的 `themes`，复制进去后“重新加载主题”即可。
 5. “自定义 CSS”编辑 `base.user.css`，对所有主题生效；也可以用 `主题名.user.css` 单独覆盖某个主题。加载顺序为主题 CSS → `base.user.css` → `主题名.user.css`；字号、字体、宽度的显式偏好设置优先于主题。
 
-兼容 `#write`、标准元素、正文 CSS 变量、字体和任务列表选择器，常用的背景、文字、侧栏和强调色变量会映射到应用界面。已用 Matcha 等主题与 Typora 逐项对照，但**不承诺所有主题与 Typora 像素级一致**。远程 `@import`、远程字体和图片会被跳过并提示；引用父目录、绝对路径和循环导入会报错；单个资源上限 8 MB，总计 20 MB。第三方主题不随安装包分发，使用时请遵守主题自身的许可证。
+兼容 `#write`、标准元素、正文 CSS 变量、字体和任务列表选择器，常用的背景、文字、侧栏和强调色变量会映射到应用界面。已用 Matcha 等主题与 Typora 逐项对照，但**不承诺所有主题与 Typora 像素级一致**。远程 `@import`、远程字体和图片会被跳过并提示；引用父目录、绝对路径和循环导入会报错；单个资源上限 16 MB，总计 20 MB。本地主题包不纳入源码仓库，主题和字体保留各自许可证。
 
 主题编写参考 Typora 的 [About Themes](https://support.typora.io/About-Themes/) 与 [Add Custom CSS](https://support.typora.io/Add-Custom-CSS/)。
 
@@ -160,7 +163,8 @@ npm run test:images
 ```text
 electron/     主进程：窗口、菜单、受限 IPC、本地文件、主题编译、导出
 src/          渲染进程：编辑模式、渲染修饰、源码模式、导出、样式
-scripts/      离线编辑器资源准备、Vditor 构建时补丁
+scripts/      离线编辑器资源准备、Vditor 构建时补丁、图标生成（npm run icon）
+build/        应用图标（SVG 源文件与各平台 PNG）
 tests/        单元测试与真实 Electron 集成测试
 examples/     完整格式样本与示例主题
 docs/         验证记录与路线图

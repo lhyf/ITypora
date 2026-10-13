@@ -51,3 +51,17 @@ test('cycle and path traversal fail without importing outside data', async (t) =
   await fs.writeFile(path.join(root, 'child/escape.css'), '@import "../outside.css";');
   await assert.rejects(importTheme(path.join(root, 'child/escape.css')), /不能超出/);
 });
+
+test('large CJK theme fonts fit the 16 MB per-file limit while the 20 MB total limit remains enforced', async t => {
+  const root = await fixture(t), file = path.join(root, 'font.css');
+  const asset = path.join(root, 'large.ttf');
+  await fs.writeFile(asset, Buffer.alloc(9 * 1024 * 1024, 65));
+  await fs.writeFile(file, '@font-face { font-family: CJK; src: url("large.ttf"); }');
+  assert.match((await importTheme(file)).css, /data:font\/ttf;base64,/);
+  await fs.writeFile(asset, Buffer.alloc(16 * 1024 * 1024 + 1, 65));
+  await assert.rejects(importTheme(file), /单文件 16 MB/);
+  await fs.writeFile(asset, Buffer.alloc(10 * 1024 * 1024, 65));
+  await fs.copyFile(asset, path.join(root, 'second.ttf'));
+  await fs.writeFile(file, '@font-face { font-family: One; src: url("large.ttf"); } @font-face { font-family: Two; src: url("second.ttf"); }');
+  await assert.rejects(importTheme(file), /总计 20 MB/);
+});

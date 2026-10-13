@@ -51,5 +51,9 @@ stay where they are written.
 `mode/markdown/markdown.js` (MIT, copyright Marijn Haverbeke and others),
 modified so source mode tokenizes Markdown the way Typora's source mode does.
 
-Imported themes are user-provided content and retain their own licenses.
-No Typora proprietary application assets or bundled themes are included.
+Imported themes and optional locally bundled themes are user-provided content
+and retain their own licenses; Itypora's MIT license does not apply to them.
+The local bundle embeds the supplied CSS/font/image resources and removes
+Typora-only export CDN directives. Available license notices accompany the
+bundle in `themes/licenses/`. Generated local bundles are excluded from the
+source repository. No Typora application binaries are included.

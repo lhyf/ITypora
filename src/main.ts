@@ -31,6 +31,7 @@ declare global {
       savePreferences(update: Partial<Preferences>): Promise<SettingsSnapshot>;
       onPreferences(callback: (snapshot: SettingsSnapshot) => void): void;
       open(file?: string): Promise<DocumentState | null>;
+      openDropped(file: File): Promise<DocumentState | null>;
       folder(): Promise<{ root: string; files: FileEntry[] } | null>;
       newDocument(): Promise<DocumentState | null>;
       save(saveAs?: boolean): Promise<DocumentState | null>;
@@ -634,7 +635,7 @@ async function find(forward = true, next = false) {
   else if (query) (window as unknown as { find(text: string, matchCase: boolean, backwards: boolean, wrap: boolean): boolean }).find(query, false, !forward, true);
 }
 
-async function action(name: string) {
+async function action(name: string, droppedFile?: File) {
   if ($<HTMLDialogElement>('#table-dialog').open) {
     if (name === 'close') cancelTableDialog();
     else if (name === 'format:undo' || name === 'format:redo') document.execCommand(name.slice(7));
@@ -675,7 +676,8 @@ async function action(name: string) {
       if (next) await loadDocument(next);
     } else if (name === 'open') {
       if (!desktop) { $<HTMLInputElement>('#browser-open').click(); return; }
-      const next = await desktop.open(); if (next) await loadDocument(next);
+      const next = droppedFile ? await desktop.openDropped(droppedFile) : await desktop.open();
+      if (next) await loadDocument(next);
     } else if (name === 'folder') {
       if (!desktop) { toast('请运行桌面版使用本地文件夹：npm run desktop'); return; }
       const folder = await desktop.folder(); if (folder) { files = folder.files; $('#workspace-name').textContent = basename(folder.root); renderFiles(); if (files.length >= 500) toast('首版最多显示 500 个 Markdown 文件。'); }
@@ -728,6 +730,30 @@ $('#browser-open').addEventListener('change', () => void run(async () => {
 desktop?.onAction(action);
 desktop?.onPreferences(next => { preferencesPage?.render(next); void applySettings(next); });
 desktop?.onPreferencesSection(showPreferences);
+// Capture native file drops before Vditor or CodeMirror treat them as pasted text.
+// Text dragged inside the editor keeps the editor's own handling.
+if (desktop) {
+  const fileDrag = (event: DragEvent) => Boolean(event.dataTransfer?.types.includes('Files'));
+  for (const name of ['dragenter', 'dragover'] as const) {
+    window.addEventListener(name, event => {
+      if (!fileDrag(event)) return;
+      event.preventDefault(); event.stopImmediatePropagation();
+      if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
+    }, true);
+  }
+  window.addEventListener('drop', event => {
+    if (!fileDrag(event)) return;
+    event.preventDefault(); event.stopImmediatePropagation();
+    const files = Array.from(event.dataTransfer?.files || []);
+    if (files.length !== 1) { toast('请一次拖入一个 Markdown 或文本文件。'); return; }
+    const file = files[0];
+    if (!/\.(md|markdown|mdown|txt)$/i.test(file.name)) {
+      toast('请拖入 Markdown 或文本文件（.md、.markdown、.mdown、.txt）。'); return;
+    }
+    if (busy || loading) { toast('正在处理文档，请稍后再拖入文件。'); return; }
+    void action('open', file);
+  }, true);
+}
 document.addEventListener('keydown', (event) => {
   if ($<HTMLDialogElement>('#table-dialog').open) return;
   if (event.key === 'Escape' && !$('#preferences').hidden) { event.preventDefault(); closePreferences(); return; }
