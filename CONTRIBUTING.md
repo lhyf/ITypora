@@ -1,11 +1,11 @@
 # 参与贡献
 
-感谢你愿意改进 Itypora！提交 Issue 和 Pull Request 前请先阅读下面的约定。
+感谢你愿意改进 ITypora！提交 Issue 和 Pull Request 前请先阅读下面的约定。
 
 ## 报告问题
 
 - 在 [Issues](https://github.com/lhyf/ITypora/issues) 中搜索是否已有相同问题。
-- 使用 Bug 模板，写明系统及版本、Itypora 版本、编辑模式（即时渲染 / 所见即所得 / 源码）、所用主题，以及能复现问题的最小 Markdown 片段。
+- 使用 Bug 模板，写明系统及版本、ITypora 版本、编辑模式（即时渲染 / 所见即所得 / 源码）、所用主题，以及能复现问题的最小 Markdown 片段。
 - 与 Typora 显示不一致的问题，最好附上两边的截图。
 - 安全问题请不要公开提交，按 [SECURITY.md](SECURITY.md) 私下报告。
 
@@ -53,7 +53,7 @@ npm run build
 
 | 修改范围 | 测试 |
 | --- | --- |
-| 文件读写、模式切换、保存 | `node tests/desktop.mjs`、`node tests/save-preserve.mjs` |
+| 文件读写、模式切换、保存 | `node tests/desktop.mjs`、`node tests/save-preserve.mjs`、`node tests/open-file.mjs` |
 | 渲染、主题、图表、公式 | `node tests/rendering.mjs`、`node tests/render-details.mjs`、`node tests/theme-rendering.mjs`、`node tests/bundled-themes.mjs` |
 | 菜单与格式操作 | `node tests/formatting.mjs`、`node tests/table-dialog.mjs` |
 | 源码模式 | `node tests/source-sync.mjs`、`node tests/code-editing.mjs` |
@@ -64,7 +64,7 @@ npm run build
 
 部分测试会用本机 Typora 的第三方主题 Matcha（`%APPDATA%/Typora/themes/matcha.css`、`matcha-dark.css`）与 Typora 对照：`rendering`、`theme-rendering`、`export`、`zoom-viewer` 没有该主题时跳过相关部分；`code-editing` 和 `render-details` 需要它。
 
-集成测试也可以针对打包后的程序运行，例如 `node tests/export.mjs release/win-unpacked/Itypora.exe`。
+集成测试也可以针对打包后的程序运行，例如 `node tests/export.mjs release/win-unpacked/ITypora.exe`。
 
 ## 提交 Pull Request
 
@@ -87,7 +87,7 @@ npm run build
    git push origin v0.4.1
    ```
 
-5. Actions 会校验标签与 `package.json` 版本一致，在 Windows、macOS、Linux 上打包，然后创建名为 `Itypora v0.4.1` 的 Release 并附上全部安装包。标签中带 `-`（如 `v0.5.0-beta.1`）时标记为预发布。
+5. Actions 会校验标签与 `package.json` 版本一致，在 Windows、macOS、Linux 上打包，然后创建名为 `ITypora v0.4.1` 的 Release 并附上全部安装包。标签中带 `-`（如 `v0.5.0-beta.1`）时标记为预发布。
 
 如果某个系统打包失败，Release 不会创建；修复后删除并重新推送同名标签即可：
 

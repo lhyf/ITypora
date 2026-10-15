@@ -1,6 +1,6 @@
-<img src="build/icon-mac.png" alt="Itypora icon" width="112" align="right">
+<img src="build/icon-mac.png" alt="ITypora icon" width="112" align="right">
 
-# Itypora
+# ITypora
 
 [![Build](https://github.com/lhyf/ITypora/actions/workflows/build.yml/badge.svg)](https://github.com/lhyf/ITypora/actions/workflows/build.yml)
 [![Release](https://img.shields.io/github/v/release/lhyf/ITypora?include_prereleases)](https://github.com/lhyf/ITypora/releases)
@@ -10,14 +10,14 @@
 
 A local-first Markdown desktop editor with live-preview, WYSIWYG and source modes. It imports Typora CSS themes and exports HTML and PDF. Runs on Windows, macOS and Linux.
 
-Itypora is an independent implementation built on Electron and Vditor, with its own interface and assets. **It is not affiliated with Typora.** The interface is currently in Chinese.
+ITypora is an independent implementation built on Electron and Vditor, with its own interface and assets. **It is not affiliated with Typora.** The interface is currently in Chinese.
 
-![Itypora with the light theme](docs/images/screenshot-light.png)
+![ITypora with the light theme](docs/images/screenshot-light.png)
 
 <details>
 <summary>Dark theme screenshot</summary>
 
-![Itypora with the dark theme](docs/images/screenshot-dark.png)
+![ITypora with the dark theme](docs/images/screenshot-dark.png)
 
 </details>
 
@@ -27,17 +27,17 @@ Get the latest version from [Releases](https://github.com/lhyf/ITypora/releases)
 
 | System | File |
 | --- | --- |
-| Windows 10/11 x64 | `Itypora-<version>-win-x64-setup.exe` (installer) or `Itypora-<version>-win-x64-portable.exe` (portable) |
-| macOS (Apple silicon) | `Itypora-<version>-mac-arm64.dmg` |
-| macOS (Intel) | `Itypora-<version>-mac-x64.dmg` |
-| Linux x64 | `Itypora-<version>-linux-x86_64.AppImage` or `Itypora-<version>-linux-amd64.deb` |
+| Windows 10/11 x64 | `ITypora-<version>-win-x64-setup.exe` (installer) or `ITypora-<version>-win-x64-portable.exe` (portable) |
+| macOS (Apple silicon) | `ITypora-<version>-mac-arm64.dmg` |
+| macOS (Intel) | `ITypora-<version>-mac-x64.dmg` |
+| Linux x64 | `ITypora-<version>-linux-x86_64.AppImage` or `ITypora-<version>-linux-amd64.deb` |
 
 The installers are not code-signed yet, so the system may block the first launch:
 
 - **Windows**: when SmartScreen says "Windows protected your PC", choose *More info → Run anyway*.
-- **macOS**: after moving Itypora to Applications, run once in Terminal:
-  `xattr -dr com.apple.quarantine /Applications/Itypora.app`
-- **Linux**: make the AppImage executable (`chmod +x Itypora-*.AppImage`). Some distributions (e.g. Ubuntu 24.04) restrict the sandbox; if it fails with a sandbox error, start it with `--no-sandbox` or install the `.deb` instead (`sudo apt install ./Itypora-*.deb`).
+- **macOS**: after moving ITypora to Applications, run once in Terminal:
+  `xattr -dr com.apple.quarantine /Applications/ITypora.app`
+- **Linux**: make the AppImage executable (`chmod +x ITypora-*.AppImage`). Some distributions (e.g. Ubuntu 24.04) restrict the sandbox; if it fails with a sandbox error, start it with `--no-sandbox` or install the `.deb` instead (`sudo apt install ./ITypora-*.deb`).
 
 ## Features
 
@@ -52,6 +52,7 @@ The installers are not code-signed yet, so the system may block the first launch
 
 **Files and interface**
 
+- Set ITypora as the system's default Markdown editor. Double-clicking a document opens it after a full exit or reuses and activates the existing window, prompting for unsaved changes first.
 - Drop a local Markdown / text file (`.md`, `.markdown`, `.mdown`, `.txt`) into the window to open it in any editing mode. Unsaved changes prompt you to save, discard or cancel. Open one file at a time.
 - Open a folder and browse its Markdown files as a list or grouped by directory; recent files, outline, find, word count.
 - Focus and typewriter modes; a resizable sidebar that remembers its width.
@@ -67,7 +68,7 @@ The installers are not code-signed yet, so the system may block the first launch
 
 ## Themes
 
-Itypora imports CSS themes written for Typora and includes 11 themes: three original colour schemes, Clarity / Clarity Dark, GitHub, Light Mind / Light Mind Dark, Matcha / Matcha Dark and MorandiGarden. Both local installers and GitHub Actions builds include these themes and their embedded font/image resources for offline use.
+ITypora imports CSS themes written for Typora and includes 11 themes: three original colour schemes, Clarity / Clarity Dark, GitHub, Light Mind / Light Mind Dark, Matcha / Matcha Dark and MorandiGarden. Both local installers and GitHub Actions builds include these themes and their embedded font/image resources for offline use.
 
 Use `npm run themes:bundle -- "theme directory"` to regenerate the eight additional themes from a local source directory. They appear in the Theme menu after installation or upgrade. Existing files, selected themes and user deletions are preserved.
 
@@ -116,14 +117,14 @@ npm run desktop     # build and start the desktop app
 ```
 
 - `npm run dev` previews the interface in a browser (folders, drafts and theme import need the desktop app).
-- `npm run pack` produces a runnable folder, e.g. `release/win-unpacked/Itypora.exe`.
+- `npm run pack` produces a runnable folder, e.g. `release/win-unpacked/ITypora.exe`.
 - `npm run dist` builds installers for the current system.
 
 Tests: `npm test` runs the unit tests; `npm run test:desktop`, `test:rendering`, `test:export` and the other `test:*` scripts drive the real Electron app (see `package.json`).
 
 ## Continuous builds and releases
 
-GitHub Actions ([`.github/workflows/build.yml`](.github/workflows/build.yml)) runs the unit tests and packages Itypora on Windows, macOS and Linux for every push and pull request; the installers are attached to the run as artifacts. Pushing a `v*` tag (for example `v0.4.0`) also publishes a GitHub Release with all installers and the matching section of [CHANGELOG.md](CHANGELOG.md). See [CONTRIBUTING.md](CONTRIBUTING.md) for the release steps.
+GitHub Actions ([`.github/workflows/build.yml`](.github/workflows/build.yml)) runs the unit tests and packages ITypora on Windows, macOS and Linux for every push and pull request; the installers are attached to the run as artifacts. Pushing a `v*` tag (for example `v0.4.0`) also publishes a GitHub Release with all installers and the matching section of [CHANGELOG.md](CHANGELOG.md). See [CONTRIBUTING.md](CONTRIBUTING.md) for the release steps.
 
 ## Known limitations
 
@@ -139,4 +140,4 @@ Issues and pull requests are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md). Pl
 
 [MIT](LICENSE). Third-party components and their licenses are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-Typora is a trademark of its owner. Itypora is an independent project and contains no Typora code, assets or bundled themes.
+Typora is a trademark of its owner. ITypora is an independent project and contains no Typora code, assets or bundled themes.

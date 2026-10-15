@@ -7,7 +7,7 @@ const checkbox = (key: keyof Preferences, label: string) => `<label class="check
 host.innerHTML = `
   <div class="preferences-header"><span>偏好设置</span><button id="close" title="关闭偏好设置（Esc）" aria-label="关闭偏好设置"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
   <div class="preferences-body">
-  <aside><input id="search" type="search" placeholder="搜索偏好设置" aria-label="搜索偏好设置"/><nav aria-label="设置分类">${categories.map(([id, label, icon]) => `<button data-section="${id}"><span class="symbol">${icon}</span>${label}</button>`).join('')}</nav><div class="brand">Itypora <span>偏好设置</span></div></aside>
+  <aside><input id="search" type="search" placeholder="搜索偏好设置" aria-label="搜索偏好设置"/><nav aria-label="设置分类">${categories.map(([id, label, icon]) => `<button data-section="${id}"><span class="symbol">${icon}</span>${label}</button>`).join('')}</nav><div class="brand">ITypora <span>偏好设置</span></div></aside>
   <main><header><h1 id="title">通用</h1><span>设置自动保存</span></header>
     <section data-page="general"><article><h2>窗口</h2>${checkbox('showStatus', '显示底部状态栏')}<p>在状态栏切换侧边栏、源码模式并查看字数。</p></article><article><h2>文档</h2><p>使用 Ctrl+S 保存文件。未保存的修改会保留恢复草稿，下次启动时可选择恢复。</p><p>当前版本支持 UTF-8 Markdown 文档。</p></article></section>
     <section data-page="appearance" hidden>

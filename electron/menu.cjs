@@ -68,7 +68,7 @@ function createMenu(action, themes, recent, view = {}) {
         .map(theme => command(`theme:${theme.id}`, theme.name, undefined, { type: 'radio', checked: (view.theme || 'paper') === theme.id })),
       separator, command('import-theme', '导入 CSS 主题…'), command('appearance', '管理主题…')
     ] },
-    { label: '帮助(&H)', submenu: [command('help', 'Markdown 快捷参考'), command('about', '关于 Itypora')] }
+    { label: '帮助(&H)', submenu: [command('help', 'Markdown 快捷参考'), command('about', '关于 ITypora')] }
   ]);
 }
 module.exports = { createMenu };

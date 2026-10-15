@@ -24,7 +24,9 @@ declare const __APP_VERSION__: string;
 declare global {
   interface Window {
     desktop?: {
-      initialize(): Promise<DocumentState & SettingsSnapshot & { platform: string }>;
+      initialize(): Promise<DocumentState & SettingsSnapshot & { platform: string; openError?: string }>;
+      ready(): void;
+      onOpenFile(callback: (file: string) => void): () => void;
       openPreferences(section: string): Promise<void>;
       preferencesCommand(name: string, value?: unknown): Promise<any>;
       onPreferencesSection(callback: (section: string) => void): void;
@@ -125,6 +127,7 @@ let recovered = false;
 let loading = true;
 let busy = false;
 let pendingClose = false;
+const pendingOpenFiles: string[] = [];
 let editorGeneration = 0;
 let themes: Theme[] = [];
 let files: FileEntry[] = [];
@@ -248,7 +251,7 @@ function sync() {
   $('#dirty-dot').hidden = !dirty();
   $('#document-name').textContent = currentPath ? basename(currentPath) : '未命名';
   $('#document-name').title = currentPath || '尚未保存到文件';
-  document.title = `${dirty() ? '● ' : ''}${$('#document-name').textContent} — Itypora`;
+  document.title = `${dirty() ? '● ' : ''}${$('#document-name').textContent} — ITypora`;
   $('#save-status').textContent = dirty() ? '未保存' : '';
   $('#save-status').title = currentPath || '尚未保存';
   const count = Array.from(raw.replace(/\s/g, '')).length;
@@ -406,7 +409,7 @@ function applyTheme(id: string) {
   const root = document.documentElement;
   for (const name of ['paper', 'ink', 'sidebar', 'muted', 'accent', 'hover', 'line']) root.style.removeProperty(`--${name}`);
   document.documentElement.dataset.theme = ['paper', 'night', 'sepia'].includes(id) ? id : 'paper';
-  // The default palettes (also theme files on desktop) keep Itypora's own base look.
+  // The default palettes (also theme files on desktop) keep ITypora's own base look.
   root.classList.toggle('itypora-imported-theme', Boolean(imported) && !['paper', 'sepia', 'night'].includes(id));
   themeStyle.textContent = imported?.css || baseCss;
   const isDarkBackground = () => {
@@ -464,6 +467,7 @@ async function run(work: () => Promise<void>) {
     } catch (error) { toast(error instanceof Error ? error.message : String(error)); }
     if (pendingSettings) { const next = pendingSettings; pendingSettings = undefined; await applySettings(next); }
     if (pendingClose) { pendingClose = false; void action('close'); }
+    else openNextRequestedFile();
   }
 }
 
@@ -635,7 +639,14 @@ async function find(forward = true, next = false) {
   else if (query) (window as unknown as { find(text: string, matchCase: boolean, backwards: boolean, wrap: boolean): boolean }).find(query, false, !forward, true);
 }
 
-async function action(name: string, droppedFile?: File) {
+function openNextRequestedFile() {
+  if (busy || loading || !pendingOpenFiles.length) return;
+  if ($<HTMLDialogElement>('#table-dialog').open) cancelTableDialog();
+  if ($<HTMLDialogElement>('#info-dialog').open) $<HTMLDialogElement>('#info-dialog').close();
+  void action('open', pendingOpenFiles.shift()!);
+}
+
+async function action(name: string, file?: File | string) {
   if ($<HTMLDialogElement>('#table-dialog').open) {
     if (name === 'close') cancelTableDialog();
     else if (name === 'format:undo' || name === 'format:redo') document.execCommand(name.slice(7));
@@ -666,7 +677,7 @@ async function action(name: string, droppedFile?: File) {
   if (name === 'typewriter') { await savePreferences({ typewriter: !preferences.typewriter }); return; }
   if (name === 'statistics') { flush(); info('字数统计', `<dl class="statistics"><dt>词数</dt><dd>${wordCount()}</dd><dt>字符（不含空格）</dt><dd>${Array.from(raw.replace(/\s/g, '')).length}</dd><dt>预计阅读</dt><dd>${Math.max(1, Math.ceil(wordCount() / preferences.readingSpeed))} 分钟</dd><dt>行数</dt><dd>${raw ? raw.split('\n').length : 0}</dd></dl><p>词数按汉字和英文单词估算，不计代码块。</p>`); return; }
   if (name === 'help') { info('Markdown 快捷参考', '<p>输入标记后按空格即可即时排版。</p><pre># 一级标题\n## 二级标题\n**加粗**　*斜体*\n- 无序列表\n1. 有序列表\n- [ ] 任务列表\n> 引用\n[链接](https://example.com)</pre><p>Ctrl+/ 切换源码 · F8 专注模式 · F9 打字机模式</p>'); return; }
-  if (name === 'about') { info(`Itypora ${__APP_VERSION__}`, '<p>本地 Markdown 编辑器。</p><p>基于 Electron 和 Vditor 独立实现，支持导入 Typora CSS 主题。与 Typora 项目无隶属关系。</p>'); return; }
+  if (name === 'about') { info(`ITypora ${__APP_VERSION__}`, '<p>本地 Markdown 编辑器。</p><p>基于 Electron 和 Vditor 独立实现，支持导入 Typora CSS 主题。与 Typora 项目无隶属关系。</p>'); return; }
   await run(async () => {
     if (name === 'close') { desktop?.update(raw, dirty()); await desktop?.close(); }
     else if (name === 'source') await changeMode(mode === 'source' ? preferences.mode === 'wysiwyg' ? 'wysiwyg' : 'ir' : 'source');
@@ -676,7 +687,7 @@ async function action(name: string, droppedFile?: File) {
       if (next) await loadDocument(next);
     } else if (name === 'open') {
       if (!desktop) { $<HTMLInputElement>('#browser-open').click(); return; }
-      const next = droppedFile ? await desktop.openDropped(droppedFile) : await desktop.open();
+      const next = typeof file === 'string' ? await desktop.open(file) : file ? await desktop.openDropped(file) : await desktop.open();
       if (next) await loadDocument(next);
     } else if (name === 'folder') {
       if (!desktop) { toast('请运行桌面版使用本地文件夹：npm run desktop'); return; }
@@ -728,6 +739,7 @@ $('#browser-open').addEventListener('change', () => void run(async () => {
   await loadDocument({ path: file.name, content: await file.text(), dirty: false, recent: [] });
 }));
 desktop?.onAction(action);
+desktop?.onOpenFile(file => { pendingOpenFiles.push(file); openNextRequestedFile(); });
 desktop?.onPreferences(next => { preferencesPage?.render(next); void applySettings(next); });
 desktop?.onPreferencesSection(showPreferences);
 // Capture native file drops before Vditor or CodeMirror treat them as pasted text.
@@ -765,8 +777,10 @@ document.addEventListener('keydown', (event) => {
 window.addEventListener('beforeunload', (event) => { if (!desktop && dirty()) { event.preventDefault(); event.returnValue = ''; } });
 
 async function start() {
+  let openError: string | undefined;
   if (desktop) {
     let initial = await desktop.initialize(); recent = initial.recent;
+    openError = initial.openError;
     if (!initial.initialized) {
       const migrated = await desktop.savePreferences({ ...preferences, theme: localStorage.getItem('itypora-theme') || 'paper', showStatus: localStorage.getItem('itypora-status') !== 'hidden' });
       initial = { ...initial, ...migrated };
@@ -778,5 +792,7 @@ async function start() {
   await mountEditor();
   applyTheme(preferences.theme); renderFiles(); sync();
   if (pendingSettings) { const next = pendingSettings; pendingSettings = undefined; await applySettings(next); }
+  if (openError) toast(openError);
+  desktop?.ready();
 }
 start().catch((error) => { loading = false; toast(`启动失败：${error.message}`); });

@@ -6,11 +6,44 @@ const { pathToFileURL, fileURLToPath } = require('node:url');
 const { atomicWrite, readDocument, listMarkdown, MAX_DOCUMENT_BYTES } = require('./files.cjs');
 const { createSettingsStore } = require('./settings.cjs');
 const { createMenu } = require('./menu.cjs');
+const { commandLineFile, documentPath } = require('./open-requests.cjs');
 
 if (!app.isPackaged && process.env.ITYPORA_TEST_USER_DATA) app.setPath('userData', path.resolve(process.env.ITYPORA_TEST_USER_DATA));
+// A display-name change must not move existing settings/themes or custom profiles.
+const preservedUserData = app.getPath('userData');
+app.setName('ITypora');
+app.setPath('userData', preservedUserData);
+const initialFile = commandLineFile(process.argv, app.isPackaged);
+// Keep OS file-open requests in one window, including requests during startup.
+if (!app.requestSingleInstanceLock({ file: initialFile })) { app.quit(); return; }
 
 protocol.registerSchemesAsPrivileged([{ scheme: 'itypora-asset', privileges: { standard: true, secure: true, supportFetchAPI: true } }]);
 let window;
+let rendererReady = false;
+const pendingOpenFiles = initialFile ? [initialFile] : [];
+function focusWindow() {
+  if (!window || window.isDestroyed()) return;
+  if (window.isMinimized()) window.restore();
+  window.show(); window.focus();
+}
+function deliverOpenFiles() {
+  if (!rendererReady || !window || window.isDestroyed()) return;
+  for (const file of pendingOpenFiles.splice(0)) {
+    allowedFiles.add(file);
+    window.webContents.send('open-file', file);
+  }
+}
+function requestOpenFile(file) {
+  if (!documentPath(file)) return;
+  pendingOpenFiles.push(file);
+  deliverOpenFiles();
+}
+app.on('second-instance', (_event, argv, cwd, additionalData) => {
+  requestOpenFile(additionalData?.file || commandLineFile(argv, app.isPackaged, cwd));
+  focusWindow();
+});
+// macOS can send this before ready, rather than passing a command-line path.
+app.on('open-file', (event, file) => { event.preventDefault(); requestOpenFile(file); });
 let settingsStore;
 const settingsSnapshot = () => settingsStore.snapshot();
 function broadcastSettings() {
@@ -227,7 +260,7 @@ app.whenReady().then(async () => {
   });
   window = new BrowserWindow({
     width: 1000, height: 800, minWidth: 620, minHeight: 420,
-    title: 'Itypora', backgroundColor: '#faf9f6', show: false,
+    title: 'ITypora', backgroundColor: '#faf9f6', show: false,
     // Windows and Linux window and taskbar icon (macOS uses the app bundle's); npm run icon draws it.
     icon: path.join(__dirname, 'icon.png'),
     webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true, ...defaultFonts() }
@@ -237,6 +270,10 @@ app.whenReady().then(async () => {
   window.webContents.session.setPermissionRequestHandler((_contents, _permission, callback) => callback(false));
   window.webContents.session.setPermissionCheckHandler(() => false);
   rebuildMenu();
+  ipcMain.on('renderer-ready', event => {
+    if (!trusted(event)) return;
+    rendererReady = true; deliverOpenFiles();
+  });
   ipcMain.on('view-update', (event, update) => {
     if (!trusted(event) || !update || typeof update !== 'object') return;
     const next = {};
@@ -257,7 +294,13 @@ app.whenReady().then(async () => {
       if (response === 0) state = { ...recovery, path: typeof recovery.path === 'string' ? recovery.path : null };
       else await fs.rm(dataFile('recovery.json'), { force: true });
     }
-    return { ...snapshot(), ...settingsSnapshot(), platform: process.platform };
+    let openError;
+    const file = pendingOpenFiles.shift();
+    if (file) {
+      try { await openDocument(file); }
+      catch (error) { openError = `无法打开 ${path.basename(file)}：${error.message}`; }
+    }
+    return { ...snapshot(), ...settingsSnapshot(), platform: process.platform, openError };
   });
   handle('open', async (file) => {
     if (file && (typeof file !== 'string' || !allowedFiles.has(file))) throw new Error('请通过文件选择器打开文档。');

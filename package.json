@@ -1,6 +1,6 @@
 {
   "name": "itypora",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "private": true,
   "description": "A local-first Markdown desktop editor",
   "keywords": [
@@ -19,7 +19,7 @@
   "bugs": {
     "url": "https://github.com/lhyf/ITypora/issues"
   },
-  "author": "Itypora contributors",
+  "author": "ITypora contributors",
   "license": "MIT",
   "type": "module",
   "main": "electron/main.cjs",
@@ -33,6 +33,7 @@
     "test": "node --test tests/*.test.cjs",
     "test:desktop": "npm run build && node tests/desktop.mjs",
     "test:drop": "npm run build && node tests/drop-open.mjs",
+    "test:open-file": "npm run build && node tests/open-file.mjs",
     "test:interface": "npm run build && node tests/interface.mjs",
     "test:preferences": "npm run build && node tests/preferences.mjs",
     "test:formatting": "npm run build && node tests/formatting.mjs",
@@ -77,7 +78,7 @@
   },
   "build": {
     "appId": "io.itypora.editor",
-    "productName": "Itypora",
+    "productName": "ITypora",
     "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
     "directories": {
       "output": "release"
@@ -93,6 +94,9 @@
       { "from": "resources/themes", "to": "themes" }
     ],
     "asar": true,
+    "fileAssociations": [
+      { "ext": ["md", "markdown", "mdown"], "name": "Markdown", "description": "Markdown 文档", "role": "Editor", "mimeType": "text/markdown" }
+    ],
     "publish": null,
     "win": {
       "target": [
@@ -159,7 +163,7 @@
       ],
       "category": "Office",
       "synopsis": "Local-first Markdown editor",
-      "maintainer": "Itypora contributors <https://github.com/lhyf/ITypora>",
+      "maintainer": "ITypora contributors <https://github.com/lhyf/ITypora>",
       "icon": "build/icon.png"
     }
   }

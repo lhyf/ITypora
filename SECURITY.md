@@ -14,10 +14,10 @@ Please do not disclose vulnerabilities in public issues. Report them privately t
 
 ## 范围 / Scope
 
-Itypora 会打开来自他人的 Markdown 文档和 CSS 主题，下列问题尤其值得报告：
+ITypora 会打开来自他人的 Markdown 文档和 CSS 主题，下列问题尤其值得报告：
 
 - 文档或主题中的内容执行脚本、访问网络或读取图片以外的本地文件；
 - 绕过渲染进程沙箱或受限 IPC；
 - 导出的 HTML 中出现可执行的脚本。
 
-Itypora opens Markdown documents and CSS themes written by others. Of particular interest are content in a document or theme that runs scripts, reaches the network or reads local files other than images, escapes the renderer sandbox or the restricted IPC, and executable script in exported HTML.
+ITypora opens Markdown documents and CSS themes written by others. Of particular interest are content in a document or theme that runs scripts, reaches the network or reads local files other than images, escapes the renderer sandbox or the restricted IPC, and executable script in exported HTML.

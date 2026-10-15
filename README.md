@@ -1,6 +1,6 @@
-<img src="build/icon-mac.png" alt="Itypora 图标" width="112" align="right">
+<img src="build/icon-mac.png" alt="ITypora 图标" width="112" align="right">
 
-# Itypora
+# ITypora
 
 [![Build](https://github.com/lhyf/ITypora/actions/workflows/build.yml/badge.svg)](https://github.com/lhyf/ITypora/actions/workflows/build.yml)
 [![Release](https://img.shields.io/github/v/release/lhyf/ITypora?include_prereleases)](https://github.com/lhyf/ITypora/releases)
@@ -10,14 +10,14 @@
 
 本地优先的 Markdown 桌面编辑器：即时渲染、所见即所得、源码三种编辑模式，可以直接导入 Typora 的 CSS 主题，导出 HTML 和 PDF。支持 Windows、macOS 和 Linux。
 
-Itypora 基于 Electron 与 Vditor 独立实现，使用自己的界面和素材，**与 Typora 项目没有任何关联**。
+ITypora 基于 Electron 与 Vditor 独立实现，使用自己的界面和素材，**与 Typora 项目没有任何关联**。
 
-![Itypora 浅色主题](docs/images/screenshot-light.png)
+![ITypora 浅色主题](docs/images/screenshot-light.png)
 
 <details>
 <summary>深色主题截图</summary>
 
-![Itypora 深色主题](docs/images/screenshot-dark.png)
+![ITypora 深色主题](docs/images/screenshot-dark.png)
 
 </details>
 
@@ -27,17 +27,17 @@ Itypora 基于 Electron 与 Vditor 独立实现，使用自己的界面和素材
 
 | 系统 | 文件 |
 | --- | --- |
-| Windows 10/11 x64 | `Itypora-<版本>-win-x64-setup.exe`（安装版）或 `Itypora-<版本>-win-x64-portable.exe`（便携版，免安装） |
-| macOS（Apple 芯片） | `Itypora-<版本>-mac-arm64.dmg` |
-| macOS（Intel） | `Itypora-<版本>-mac-x64.dmg` |
-| Linux x64 | `Itypora-<版本>-linux-x86_64.AppImage` 或 `Itypora-<版本>-linux-amd64.deb` |
+| Windows 10/11 x64 | `ITypora-<版本>-win-x64-setup.exe`（安装版）或 `ITypora-<版本>-win-x64-portable.exe`（便携版，免安装） |
+| macOS（Apple 芯片） | `ITypora-<版本>-mac-arm64.dmg` |
+| macOS（Intel） | `ITypora-<版本>-mac-x64.dmg` |
+| Linux x64 | `ITypora-<版本>-linux-x86_64.AppImage` 或 `ITypora-<版本>-linux-amd64.deb` |
 
 安装包目前没有做商业代码签名，首次运行时系统可能拦截：
 
 - **Windows**：SmartScreen 提示“已保护你的电脑”时，点“更多信息 → 仍要运行”。
-- **macOS**：把 Itypora 拖进“应用程序”后，在终端执行一次
-  `xattr -dr com.apple.quarantine /Applications/Itypora.app`，之后即可正常打开。
-- **Linux**：AppImage 需要先 `chmod +x Itypora-*.AppImage`。部分发行版（如 Ubuntu 24.04）限制了沙箱，启动报 sandbox 错误时可加 `--no-sandbox` 参数，或改用 `.deb` 安装包（`sudo apt install ./Itypora-*.deb`）。
+- **macOS**：把 ITypora 拖进“应用程序”后，在终端执行一次
+  `xattr -dr com.apple.quarantine /Applications/ITypora.app`，之后即可正常打开。
+- **Linux**：AppImage 需要先 `chmod +x ITypora-*.AppImage`。部分发行版（如 Ubuntu 24.04）限制了沙箱，启动报 sandbox 错误时可加 `--no-sandbox` 参数，或改用 `.deb` 安装包（`sudo apt install ./ITypora-*.deb`）。
 
 ## 功能
 
@@ -53,6 +53,7 @@ Itypora 基于 Electron 与 Vditor 独立实现，使用自己的界面和素材
 
 **文件与界面**
 
+- 可在系统中设置为默认 Markdown 编辑器；完全退出后双击文档会直接打开，应用已运行时则使用现有窗口打开并激活，有未保存修改时会先提示。
 - 将本地 Markdown / 文本文件（`.md`、`.markdown`、`.mdown`、`.txt`）拖入打开的窗口即可打开，三种编辑模式均支持；当前文档有未保存修改时会先提示保存、放弃或取消。一次打开一个文件。
 - 打开文件夹，列表或目录分组浏览其中的 Markdown 文件；最近文档、文档大纲、文内查找、字数统计。
 - 专注模式、打字机模式；侧栏可拖动调宽，宽度重启后保留。
@@ -69,12 +70,12 @@ Itypora 基于 Electron 与 Vditor 独立实现，使用自己的界面和素材
 
 ## 主题
 
-Itypora 可以导入为 Typora 编写的 CSS 正文主题，内置素纸、暖砂、夜读，以及 Clarity / Clarity Dark、GitHub、Light Mind / Light Mind Dark、Matcha / Matcha Dark、MorandiGarden，共 11 个主题。随主题提供的字体和图片已内嵌，离线可用；本地和 GitHub 自动构建的安装包均包含这些主题，安装后可直接选择。新增主题不会覆盖已有主题文件或当前选择；用户删除的主题不会在重启后重新出现。使用 `npm run themes:bundle -- "主题目录"` 可从本机主题目录重新生成这 8 个附加主题。
+ITypora 可以导入为 Typora 编写的 CSS 正文主题，内置素纸、暖砂、夜读，以及 Clarity / Clarity Dark、GitHub、Light Mind / Light Mind Dark、Matcha / Matcha Dark、MorandiGarden，共 11 个主题。随主题提供的字体和图片已内嵌，离线可用；本地和 GitHub 自动构建的安装包均包含这些主题，安装后可直接选择。新增主题不会覆盖已有主题文件或当前选择；用户删除的主题不会在重启后重新出现。使用 `npm run themes:bundle -- "主题目录"` 可从本机主题目录重新生成这 8 个附加主题。
 
 1. 保持主题原来的文件结构，例如 `my-theme.css`、`my-theme/fonts/`。
 2. 点击“主题 → 导入 CSS 主题…”，选择入口 `.css` 文件。本地 `@import`、同目录及子目录中的图片和字体会一起打包进主题副本，原文件不变。
 3. 通过“主题”菜单或“偏好设置 → 外观 → 当前主题”切换。主题由用户手动选择，不随系统明暗切换。
-4. “打开主题文件夹”可直接管理 Itypora 用户数据目录中的 `themes`，复制进去后“重新加载主题”即可。
+4. “打开主题文件夹”可直接管理 ITypora 用户数据目录中的 `themes`，复制进去后“重新加载主题”即可。
 5. “自定义 CSS”编辑 `base.user.css`，对所有主题生效；也可以用 `主题名.user.css` 单独覆盖某个主题。加载顺序为主题 CSS → `base.user.css` → `主题名.user.css`；字号、字体、宽度的显式偏好设置优先于主题。
 
 兼容 `#write`、标准元素、正文 CSS 变量、字体和任务列表选择器，常用的背景、文字、侧栏和强调色变量会映射到应用界面。已用 Matcha 等主题与 Typora 逐项对照，但**不承诺所有主题与 Typora 像素级一致**。远程 `@import`、远程字体和图片会被跳过并提示；引用父目录、绝对路径和循环导入会报错；单个资源上限 16 MB，总计 20 MB。内置主题资源位于 `resources/themes/`，主题和字体保留各自许可证。
@@ -126,7 +127,7 @@ npm run desktop     # 构建并启动桌面版
 ```
 
 - `npm run dev`：在浏览器中预览界面（文件夹、草稿恢复、主题导入等功能需要桌面版）。
-- `npm run pack`：生成可直接运行的目录，例如 Windows 的 `release/win-unpacked/Itypora.exe`。
+- `npm run pack`：生成可直接运行的目录，例如 Windows 的 `release/win-unpacked/ITypora.exe`。
 - `npm run dist`：在当前系统上生成安装包（Windows NSIS/便携版、macOS DMG/ZIP、Linux AppImage/DEB）。
 
 首次安装依赖和打包需要联网下载 Electron；打包后的应用可以完全离线使用。
@@ -186,4 +187,4 @@ docs/         验证记录与路线图
 
 [MIT](LICENSE)。第三方组件的许可证见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
-Typora 是其所有者的商标。Itypora 是独立项目，不包含 Typora 的任何程序代码、素材或内置主题。
+Typora 是其所有者的商标。ITypora 是独立项目，不包含 Typora 的任何程序代码、素材或内置主题。

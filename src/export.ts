@@ -250,7 +250,7 @@ export async function exportPage(write: HTMLElement, title: string) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="script-src 'none'; object-src 'none'">
-<meta name="generator" content="Itypora">
+<meta name="generator" content="ITypora">
 <title>${escapeHtml(title)}</title>
 <style>
 ${styleSheets()}

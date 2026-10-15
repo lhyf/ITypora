@@ -1,6 +1,6 @@
 # Third-party components
 
-Itypora is released under the MIT License (see `LICENSE`). It is an
+ITypora is released under the MIT License (see `LICENSE`). It is an
 independent application and is not affiliated with Typora.
 
 Primary components:
@@ -52,7 +52,7 @@ stay where they are written.
 modified so source mode tokenizes Markdown the way Typora's source mode does.
 
 Imported themes and the eight user-selected bundled themes are user-provided content
-and retain their own licenses; Itypora's MIT license does not apply to them.
+and retain their own licenses; ITypora's MIT license does not apply to them.
 The local bundle embeds the supplied CSS/font/image resources and removes
 Typora-only export CDN directives. Available license notices accompany the
 bundle in `themes/licenses/`. The bundled themes are Clarity, Clarity Dark,

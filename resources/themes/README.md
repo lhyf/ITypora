@@ -1,6 +1,6 @@
 # Bundled themes
 
-The following eight user-selected themes ship with Itypora, in addition to
+The following eight user-selected themes ship with ITypora, in addition to
 its three original colour schemes:
 
 - Clarity Dark (`clarity-dark.css`)
@@ -16,7 +16,7 @@ The compiled CSS, `manifest.json` and available font/license notices in
 `licenses/` are committed so GitHub Actions can package them on every platform
 without accessing a developer's local Typora installation. Fonts, images and
 CSS imports are embedded for offline use. These themes retain their original
-licenses and are not relicensed under Itypora's MIT license.
+licenses and are not relicensed under ITypora's MIT license.
 
 To regenerate these eight themes from an updated source directory:
 

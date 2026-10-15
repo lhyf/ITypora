@@ -54,7 +54,7 @@ jobs:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
       - uses: actions/upload-artifact@v4
         with:
-          name: Itypora-${{ matrix.name }}
+          name: ITypora-${{ matrix.name }}
           if-no-files-found: error
           path: |
             release/*.exe
@@ -82,7 +82,7 @@ jobs:
         shell: bash
         run: |
           run() { if [ "$RUNNER_OS" = Linux ]; then xvfb-run --auto-servernum node "$@"; else node "$@"; fi; }
-          for test in desktop preferences sidebar drop-open bundled-themes; do run "tests/$test.mjs"; done
+          for test in desktop preferences sidebar drop-open open-file bundled-themes; do run "tests/$test.mjs"; done
 
   release:
     name: GitHub Release
@@ -105,7 +105,7 @@ jobs:
           cat .github/release-footer.md >> notes.md
       - uses: softprops/action-gh-release@v2
         with:
-          name: Itypora ${{ github.ref_name }}
+          name: ITypora ${{ github.ref_name }}
           body_path: notes.md
           prerelease: ${{ contains(github.ref_name, '-') }}
           fail_on_unmatched_files: true

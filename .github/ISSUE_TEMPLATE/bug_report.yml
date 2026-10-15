@@ -23,7 +23,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: Itypora 版本 / Version
+      label: ITypora 版本 / Version
       description: 帮助 → 关于 / Help → About
       placeholder: 0.4.0
     validations:

@@ -4,7 +4,7 @@ import path from 'node:path';
 import os from 'node:os';
 
 const temporary = await fs.mkdtemp(path.join(os.tmpdir(), 'itypora-packaged-'));
-const executablePath = process.argv[2] || path.resolve('release/win-unpacked/Itypora.exe');
+const executablePath = process.argv[2] || path.resolve('release/win-unpacked/ITypora.exe');
 const app = await electron.launch({ executablePath, args: [`--user-data-dir=${temporary}`] });
 try {
   const page = await app.firstWindow();
@@ -13,6 +13,7 @@ try {
   await expect(page.locator('.vditor-toolbar')).toBeHidden();
   await expect(page.locator('#vditor-icon-bold')).toHaveCount(1);
   expect(await app.evaluate(({ app }) => app.isPackaged)).toBe(true);
+  expect(await app.evaluate(({ app }) => app.getName())).toBe('ITypora');
   const version = JSON.parse(await fs.readFile('package.json', 'utf8')).version;
   expect(await app.evaluate(({ app }) => app.getVersion())).toBe(version);
   const bundled = JSON.parse(await fs.readFile('resources/themes/manifest.json', 'utf8'));
@@ -31,6 +32,7 @@ try {
   await app.evaluate(({ dialog }, file) => { dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [file] }); }, path.resolve('tests/fixtures/参考文档.md'));
   await menu('open');
   await expect(page.locator('#write h1')).toContainText('写作与思考');
+  await expect(page).toHaveTitle('参考文档.md — ITypora');
   if (process.argv[3]) {
     await app.evaluate(({ dialog }, file) => { dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [file] }); }, path.resolve(process.argv[3]));
     await menu('import-theme');
@@ -50,6 +52,7 @@ try {
   await menu('appearance');
   const prefs = page;
   await expect(prefs.locator('#current-theme')).toBeVisible();
+  await expect(prefs.locator('.brand')).toContainText('ITypora');
   expect(await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().length)).toBe(1);
   const selectedTheme = await prefs.locator('#current-theme').inputValue();
   await expect(prefs.locator('[data-setting="separateDark"], #dark-theme')).toHaveCount(0);

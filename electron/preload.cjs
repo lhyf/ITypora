@@ -2,6 +2,12 @@ const { contextBridge, ipcRenderer, webUtils } = require('electron');
 
 contextBridge.exposeInMainWorld('desktop', {
   initialize: () => ipcRenderer.invoke('initialize'),
+  ready: () => ipcRenderer.send('renderer-ready'),
+  onOpenFile: callback => {
+    const listener = (_event, file) => callback(file);
+    ipcRenderer.on('open-file', listener);
+    return () => ipcRenderer.removeListener('open-file', listener);
+  },
   openPreferences: section => ipcRenderer.invoke('open-preferences', section),
   preferencesCommand: (name, value) => ipcRenderer.invoke('preferences-command', name, value),
   onPreferencesSection: callback => ipcRenderer.on('preferences-section', (_event, value) => callback(value)),
