@@ -82,7 +82,7 @@ jobs:
         shell: bash
         run: |
           run() { if [ "$RUNNER_OS" = Linux ]; then xvfb-run --auto-servernum node "$@"; else node "$@"; fi; }
-          for test in desktop preferences sidebar drop-open open-file bundled-themes; do run "tests/$test.mjs"; done
+          for test in desktop preferences sidebar drop-open open-file bundled-themes updates; do run "tests/$test.mjs"; done
 
   release:
     name: GitHub Release

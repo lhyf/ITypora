@@ -1,4 +1,4 @@
-const { app, BrowserWindow, dialog, ipcMain, Menu, protocol, shell } = require('electron');
+const { app, BrowserWindow, dialog, ipcMain, Menu, net, protocol, shell } = require('electron');
 const fs = require('node:fs/promises');
 const crypto = require('node:crypto');
 const path = require('node:path');
@@ -7,6 +7,7 @@ const { atomicWrite, readDocument, listMarkdown, MAX_DOCUMENT_BYTES } = require(
 const { createSettingsStore } = require('./settings.cjs');
 const { createMenu } = require('./menu.cjs');
 const { commandLineFile, documentPath } = require('./open-requests.cjs');
+const { latestRelease } = require('./updates.cjs');
 
 if (!app.isPackaged && process.env.ITYPORA_TEST_USER_DATA) app.setPath('userData', path.resolve(process.env.ITYPORA_TEST_USER_DATA));
 // A display-name change must not move existing settings/themes or custom profiles.
@@ -74,11 +75,39 @@ let view = {};
 // The file chosen for the export in progress; the page itself comes from the renderer.
 let exportTarget = null;
 const MAX_EXPORT_BYTES = 512 * 1024 * 1024;
-const sendAction = (name) => window?.webContents.send('action', name);
-const rebuildMenu = () => Menu.setApplicationMenu(createMenu(sendAction, themes, recent, view));
+let checkingUpdates = false;
+const sendAction = (name) => name === 'check-updates' ? checkForUpdates() : window?.webContents.send('action', name);
+const rebuildMenu = () => Menu.setApplicationMenu(createMenu(sendAction, themes, recent, { ...view, checkingUpdates }));
 const entry = pathToFileURL(path.join(__dirname, '../dist/index.html')).href;
 const dataFile = (name) => path.join(app.getPath('userData'), name);
 const snapshot = () => ({ path: state.path, content: state.content, dirty: state.dirty, recent });
+
+async function checkForUpdates() {
+  if (checkingUpdates) return;
+  checkingUpdates = true; rebuildMenu();
+  const owner = window;
+  try {
+    const currentVersion = app.getVersion();
+    const release = await latestRelease(currentVersion, (url, options) => net.fetch(url, options));
+    if (owner.isDestroyed()) return;
+    const { response } = await dialog.showMessageBox(owner, {
+      type: 'info', title: '检查更新',
+      message: release?.newer ? `发现新版本 ITypora ${release.version}` : release ? '当前已是最新版本' : '暂时没有可用的正式版本',
+      detail: `当前版本：${currentVersion}${release ? `\nGitHub 最新正式版：${release.version}` : ''}${release?.newer ? '\n\n打开 GitHub 发布页，下载安装包后即可升级。' : ''}`,
+      buttons: release?.newer ? ['打开下载页面', '稍后再说'] : ['确定'],
+      defaultId: 0, cancelId: release?.newer ? 1 : 0, noLink: true
+    });
+    if (release?.newer && response === 0) await shell.openExternal(release.url);
+  } catch (error) {
+    if (!owner.isDestroyed()) await dialog.showMessageBox(owner, {
+      type: 'warning', title: '检查更新', message: '检查更新失败', detail: error.message,
+      buttons: ['确定'], noLink: true
+    }).catch(() => {});
+  } finally {
+    checkingUpdates = false;
+    if (!owner.isDestroyed()) rebuildMenu();
+  }
+}
 
 async function readJson(name, fallback) {
   try { return JSON.parse(await fs.readFile(dataFile(name), 'utf8')); } catch { return fallback; }

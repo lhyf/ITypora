@@ -57,6 +57,7 @@ The installers are not code-signed yet, so the system may block the first launch
 - Open a folder and browse its Markdown files as a list or grouped by directory; recent files, outline, find, word count.
 - Focus and typewriter modes; a resizable sidebar that remembers its width.
 - Native menus and an in-window preferences page (General, Appearance, Editor, Markdown) with search.
+- Help → Check for Updates queries the latest stable GitHub release on demand and offers its download page when a newer version is available. It uses the system proxy and reports connection failures or timeouts without interrupting editing.
 
 **Export** (File → Export)
 
