@@ -31,10 +31,14 @@ const launch = async target => {
   return page;
 };
 const openAgain = target => new Promise((resolve, reject) => {
-  const child = spawn(executablePath || electronPath, args(target), { cwd: temporary, env, stdio: 'ignore', windowsHide: true });
+  // Match Playwright's launch defaults, including Linux CI's sandbox setup.
+  const child = spawn(executablePath || electronPath, ['--no-sandbox', ...args(target)], { cwd: temporary, env, stdio: ['ignore', 'ignore', 'pipe'], windowsHide: true });
+  let diagnostics = '';
+  child.stderr.setEncoding('utf8');
+  child.stderr.on('data', text => { diagnostics = (diagnostics + text).slice(-8000); });
   const timer = setTimeout(() => { child.kill(); reject(new Error('Second instance did not exit')); }, 15000);
   child.once('error', error => { clearTimeout(timer); reject(error); });
-  child.once('exit', code => { clearTimeout(timer); code === 0 ? resolve() : reject(new Error(`Second instance exited with ${code}`)); });
+  child.once('close', (code, signal) => { clearTimeout(timer); code === 0 ? resolve() : reject(new Error(`Second instance exited with ${signal || code}\n${diagnostics}`)); });
 });
 const menu = id => app.evaluate(({ Menu, BrowserWindow }, command) => new Promise(resolve => {
   const window = BrowserWindow.getAllWindows()[0];
