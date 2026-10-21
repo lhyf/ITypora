@@ -310,12 +310,6 @@ app.whenReady().then(async () => {
     next.theme = typeof update.theme === 'string' ? update.theme.slice(0, 100) : 'paper';
     if (JSON.stringify(next) !== JSON.stringify(view)) { view = next; rebuildMenu(); }
   });
-  handle('find', (query, forward = true, next = false) => {
-    if (typeof query !== 'string' || query.length > 1000) return;
-    if (!query) { window.webContents.stopFindInPage('clearSelection'); return; }
-    window.webContents.findInPage(query, { forward: Boolean(forward), findNext: !next });
-  });
-  window.webContents.on('found-in-page', (_event, result) => window.webContents.send('find-result', { current: result.activeMatchOrdinal, total: result.matches }));
   handle('initialize', async () => {
     const recovery = await readJson('recovery.json', null);
     if (recovery?.dirty && typeof recovery.content === 'string') {

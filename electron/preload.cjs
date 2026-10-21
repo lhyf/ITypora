@@ -25,12 +25,6 @@ contextBridge.exposeInMainWorld('desktop', {
   update: (content, dirty) => ipcRenderer.send('document-update', { content, dirty }),
   importTheme: () => ipcRenderer.invoke('import-theme'),
   view: (state) => ipcRenderer.send('view-update', state),
-  find: (query, forward, next) => ipcRenderer.invoke('find', query, forward, next),
-  onFind: (callback) => {
-    const listener = (_event, result) => callback(result);
-    ipcRenderer.on('find-result', listener);
-    return () => ipcRenderer.removeListener('find-result', listener);
-  },
   onAction: (callback) => {
     const listener = async (_event, action) => {
       try { await callback(action); }

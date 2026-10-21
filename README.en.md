@@ -97,6 +97,8 @@ Themes are checked against Typora (Matcha and others), but pixel-identical rende
 | Toggle sidebar | Ctrl+Shift+L | Cmd+Shift+L |
 | Outline | Ctrl+Shift+1 | Cmd+Shift+1 |
 | Find | Ctrl+F | Cmd+F |
+| Next / previous match | F3 / Shift+F3 | F3 / Shift+F3 |
+| Next / previous match from the search field | Enter / Shift+Enter | Enter / Shift+Enter |
 | Preferences | Ctrl+, | Cmd+, |
 | Focus / typewriter mode | F8 / F9 | F8 / F9 |
 | Paragraph | Ctrl+0 | Cmd+0 |
@@ -105,6 +107,8 @@ Themes are checked against Typora (Matcha and others), but pixel-identical rende
 | Underline / highlight | Ctrl+U / Ctrl+Shift+H | Cmd+U / Cmd+Shift+H |
 | Zoom interface in / out | Ctrl+Shift+= / Ctrl+Shift+- | Cmd+Shift+= / Cmd+Shift+- |
 | View a diagram, formula or image enlarged | Double-click | Double-click |
+
+Drag the scrollbar at the right edge of the editor to navigate long documents in both rendered and source modes.
 
 ## Building from source
 

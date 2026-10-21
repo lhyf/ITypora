@@ -104,6 +104,8 @@ ITypora 可以导入为 Typora 编写的 CSS 正文主题，内置素纸、暖�
 | 侧栏切换 | Ctrl+Shift+L | Cmd+Shift+L |
 | 大纲 | Ctrl+Shift+1 | Cmd+Shift+1 |
 | 查找 | Ctrl+F | Cmd+F |
+| 下一个 / 上一个匹配 | F3 / Shift+F3 | F3 / Shift+F3 |
+| 搜索框内下一个 / 上一个匹配 | Enter / Shift+Enter | Enter / Shift+Enter |
 | 偏好设置 | Ctrl+, | Cmd+, |
 | 专注模式 / 打字机模式 | F8 / F9 | F8 / F9 |
 | 普通段落 | Ctrl+0 | Cmd+0 |
@@ -115,6 +117,8 @@ ITypora 可以导入为 Typora 编写的 CSS 正文主题，内置素纸、暖�
 | 放大查看图表 / 公式 / 图片 | 双击 | 双击 |
 
 Esc 退出专注模式和放大查看。
+
+长文档可拖动编辑区右侧滚动条快速定位，正文和源码模式均支持。
 
 ## 从源码构建
 

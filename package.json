@@ -1,6 +1,6 @@
 {
   "name": "itypora",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "private": true,
   "description": "A local-first Markdown desktop editor",
   "keywords": [
@@ -36,6 +36,7 @@
     "test:open-file": "npm run build && node tests/open-file.mjs",
     "test:updates": "npm run build && node tests/updates.mjs",
     "test:interface": "npm run build && node tests/interface.mjs",
+    "test:find-scroll": "npm run build && node tests/find-scroll.mjs",
     "test:preferences": "npm run build && node tests/preferences.mjs",
     "test:formatting": "npm run build && node tests/formatting.mjs",
     "test:table-dialog": "npm run build && node tests/table-dialog.mjs",

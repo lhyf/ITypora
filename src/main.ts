@@ -11,6 +11,8 @@ import { loadMathJax } from './mathjax';
 import { createPreserver } from './preserve.mjs';
 import { previewSpot, showInPreview, showInSource, sourceSpot } from './source-sync';
 import { SourceEditor } from './source-editor';
+import { installDocumentScrollbar } from './document-scrollbar';
+import { DocumentFind } from './document-find';
 import { closeZoomViewer, installZoom, zoomViewerOpen } from './zoom-viewer';
 import { exportPage } from './export';
 import { assetBase } from './asset-url';
@@ -43,8 +45,6 @@ declare global {
       update(content: string, dirty: boolean): void;
       importTheme(): Promise<Theme | null>;
       view(state: Record<string, boolean | string>): void;
-      find(query: string, forward?: boolean, next?: boolean): Promise<void>;
-      onFind(callback: (result: { current: number; total: number }) => void): () => void;
       onAction(callback: (action: string) => Promise<void>): () => void;
     };
   }
@@ -80,7 +80,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
     <div id="sidebar-resizer" role="separator" tabindex="0" aria-label="调整侧栏宽度" aria-orientation="vertical" aria-controls="sidebar" title="拖动调整侧栏宽度，双击恢复默认"></div>
   </aside>
   <main class="main">
-    <div class="findbar" hidden><input id="find-query" placeholder="查找" aria-label="查找正文" /><span id="find-result"></span><button data-action="find-previous" aria-label="上一个">↑</button><button data-action="find-next" aria-label="下一个">↓</button><button data-action="close-find" aria-label="关闭查找">×</button></div>
+    <div class="findbar" hidden><input id="find-query" placeholder="查找（Enter 下一个，Shift+Enter 上一个）" aria-label="查找正文" /><span id="find-result"></span><button data-action="find-previous" aria-label="上一个" title="上一个（Shift+Enter / Shift+F3）">↑</button><button data-action="find-next" aria-label="下一个" title="下一个（Enter / F3）">↓</button><button data-action="close-find" aria-label="关闭查找" title="关闭查找（Esc）">×</button></div>
     <section class="editor-surface"><div id="editor"></div><div id="source-editor" hidden></div></section>
   </main>
   </div>
@@ -107,6 +107,7 @@ const desktop = window.desktop;
 installDocumentNavigation($('#editor'));
 installZoom($('#editor'), () => syncView());
 const source = new SourceEditor($('#source-editor'), () => { raw = source.value; sync(); });
+const documentFind = new DocumentFind();
 // The source caret lives in CodeMirror, not the document selection; menus follow it.
 source.cm.on('cursorActivity', () => syncView());
 let editor: Vditor;
@@ -147,6 +148,14 @@ try {
   preferences.theme = stored.theme || localStorage.getItem('itypora-theme') || lightTheme || 'paper';
 } catch { /* Use defaults for corrupt settings. */ }
 mode = preferences.mode === 'wysiwyg' ? 'wysiwyg' : 'ir';
+installDocumentScrollbar($('.editor-surface'), () => {
+  if (mode === 'source') {
+    const info = source.cm.getScrollInfo();
+    return { element: source.cm.getScrollerElement(), top: info.top, height: info.height, viewport: info.clientHeight, scrollTo: (top: number) => { source.scrollTop = top; } };
+  }
+  const writing = document.querySelector<HTMLElement>('#write');
+  return writing ? { element: writing, top: writing.scrollTop, height: writing.scrollHeight, viewport: writing.clientHeight, scrollTo: (top: number) => { writing.scrollTop = top; } } : null;
+});
 document.body.classList.toggle('sidebar-hidden', localStorage.getItem('itypora-sidebar') !== 'visible');
 setupSidebarResize();
 document.body.classList.toggle('status-hidden', localStorage.getItem('itypora-status') === 'hidden');
@@ -279,6 +288,7 @@ function renderDocument() {
 const editorKey = (editing: typeof mode) => JSON.stringify([editing, preferences.typewriter, preferences.autoSpace, preferences.codeLineNumbers, preferences.tabSize]);
 
 async function mountEditor() {
+  documentFind.clear(); $('#find-result').textContent = '';
   loading = true;
   const generation = ++editorGeneration;
   paddingObserver?.disconnect(); selection = null;
@@ -502,6 +512,7 @@ async function exportDocument(kind: 'html' | 'pdf') {
 
 async function changeMode(next: typeof mode) {
   if (next === mode) return;
+  documentFind.clear(); $('#find-result').textContent = '';
   if (next === 'source') {
     source.value = raw; sourceBase = raw;
     const spot = editorAlive ? previewSpot($('#write'), source.value) : null;
@@ -628,15 +639,18 @@ function info(title: string, html: string) {
 
 async function find(forward = true, next = false) {
   const query = $<HTMLInputElement>('#find-query').value;
+  if (!query) { documentFind.clear(); $('#find-result').textContent = ''; return; }
   if (mode === 'source') {
-    if (!query) { $('#find-result').textContent = ''; return; }
+    documentFind.clear();
     const matches = Array.from(source.value.matchAll(new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'))).map(match => match.index!);
     const at = next ? (forward ? source.selectionEnd : source.selectionStart - 1) : 0;
     const position = forward ? matches.find(index => index >= at) ?? matches[0] : [...matches].reverse().find(index => index <= at) ?? matches.at(-1);
-    if (position !== undefined) { source.focus(); source.setSelectionRange(position, position + query.length); source.scrollIntoView(); }
+    if (position !== undefined) { source.setSelectionRange(position, position + query.length); source.scrollIntoView(); }
     $('#find-result').textContent = `${position === undefined ? 0 : matches.indexOf(position) + 1} / ${matches.length}`;
-  } else if (desktop) await desktop.find(query, forward, next);
-  else if (query) (window as unknown as { find(text: string, matchCase: boolean, backwards: boolean, wrap: boolean): boolean }).find(query, false, !forward, true);
+  } else {
+    const result = documentFind.find($('#write'), query, forward, next);
+    $('#find-result').textContent = `${result.current} / ${result.total}`;
+  }
 }
 
 function openNextRequestedFile() {
@@ -672,7 +686,7 @@ async function action(name: string, file?: File | string) {
   if (name === 'statusbar') { await savePreferences({ showStatus: !preferences.showStatus }); return; }
   if (name === 'find') { $('.findbar').hidden = false; $<HTMLInputElement>('#find-query').focus(); $<HTMLInputElement>('#find-query').select(); return; }
   if (name === 'find-next' || name === 'find-previous') { if ($('.findbar').hidden) await action('find'); else await find(name === 'find-next', true); return; }
-  if (name === 'close-find') { $('.findbar').hidden = true; await desktop?.find(''); return; }
+  if (name === 'close-find') { $('.findbar').hidden = true; documentFind.clear(); $('#find-result').textContent = ''; return; }
   if (name === 'preferences' || name === 'appearance') { if (desktop) await desktop.openPreferences(name === 'appearance' ? 'appearance' : 'general'); else toast('请运行桌面版使用完整偏好设置。'); return; }
   if (name === 'typewriter') { await savePreferences({ typewriter: !preferences.typewriter }); return; }
   if (name === 'statistics') { flush(); info('字数统计', `<dl class="statistics"><dt>词数</dt><dd>${wordCount()}</dd><dt>字符（不含空格）</dt><dd>${Array.from(raw.replace(/\s/g, '')).length}</dd><dt>预计阅读</dt><dd>${Math.max(1, Math.ceil(wordCount() / preferences.readingSpeed))} 分钟</dd><dt>行数</dt><dd>${raw ? raw.split('\n').length : 0}</dd></dl><p>词数按汉字和英文单词估算，不计代码块。</p>`); return; }
@@ -728,9 +742,8 @@ document.addEventListener('selectionchange', () => {
   document.querySelectorAll('.active-paragraph').forEach(item => item.classList.remove('active-paragraph'));
   if (block?.parentElement?.id === 'write') block.classList.add('active-paragraph');
 });
-$('#find-query').addEventListener('input', () => { if (mode !== 'source') void find(); });
-$('#find-query').addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); void find(!event.shiftKey, true); } });
-desktop?.onFind(result => { $('#find-result').textContent = `${result.current} / ${result.total}`; });
+$('#find-query').addEventListener('input', () => { void find(); });
+$('#find-query').addEventListener('keydown', event => { if (event.key === 'Enter' && !event.isComposing) { event.preventDefault(); void find(!event.shiftKey, true); } });
 $('#file-search').addEventListener('input', renderFiles);
 $('#browser-open').addEventListener('change', () => void run(async () => {
   const input = $<HTMLInputElement>('#browser-open'); const file = input.files?.[0]; input.value = '';
@@ -771,7 +784,7 @@ document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape' && !$('#preferences').hidden) { event.preventDefault(); closePreferences(); return; }
   if (event.key === 'Escape') { void action('close-find'); document.body.classList.remove('focus-mode'); syncView(); }
   if (desktop || !(event.ctrlKey || event.metaKey)) return;
-  const name = event.key.toLowerCase() === 's' ? event.shiftKey ? 'save-as' : 'save' : event.key.toLowerCase() === 'o' ? 'open' : event.key === '/' ? 'source' : null;
+  const name = event.key.toLowerCase() === 'f' ? 'find' : event.key.toLowerCase() === 's' ? event.shiftKey ? 'save-as' : 'save' : event.key.toLowerCase() === 'o' ? 'open' : event.key === '/' ? 'source' : null;
   if (name) { event.preventDefault(); void action(name); }
 });
 window.addEventListener('beforeunload', (event) => { if (!desktop && dirty()) { event.preventDefault(); event.returnValue = ''; } });
