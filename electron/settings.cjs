@@ -17,7 +17,13 @@ function sanitize(update) {
     if (typeof defaults[key] === 'boolean' && typeof value === 'boolean') result[key] = value;
     else if (key === 'mode' && ['ir', 'wysiwyg'].includes(value)) result[key] = value;
     else if (key === 'size' && (value === '0' || Number(value) >= 10 && Number(value) <= 36)) result[key] = String(Number(value));
-    else if (key === 'width' && (value === '0' || Number(value) >= 500 && Number(value) <= 1800)) result[key] = String(Number(value));
+    else if (key === 'width') {
+      if (value === '0') result[key] = value;
+      else if (typeof value === 'string' && /^\d+(?:\.\d+)?%$/.test(value)) {
+        const percent = Number(value.slice(0, -1));
+        if (percent >= 1 && percent <= 100) result[key] = `${percent}%`;
+      } else if (['string', 'number'].includes(typeof value) && Number.isFinite(Number(value)) && Number(value) >= 500) result[key] = String(Number(value));
+    }
     else if (key === 'readingSpeed' && Number.isFinite(value) && value >= 50 && value <= 2000) result[key] = Math.round(value);
     else if (key === 'tabSize' && [2, 4, 8].includes(value)) result[key] = value;
     else if (['theme', 'fontFamily'].includes(key) && typeof value === 'string' && value.length <= 200) result[key] = value;

@@ -13,6 +13,7 @@ const menu = id => app.evaluate(({ Menu, BrowserWindow }, command) => new Promis
   window.webContents.ipc.once('action-complete', () => resolve());
   const item = Menu.getApplicationMenu().getMenuItemById(command); item.click(item, window);
 }), id);
+const widthRatio = (page, selector) => page.locator(selector).evaluate(el => el.getBoundingClientRect().width / el.closest('.editor-surface').clientWidth);
 try {
   let page = await launch(); let prefs = await preferences(page);
   expect(await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().length)).toBe(1);
@@ -50,9 +51,101 @@ try {
   await page.locator('#write').click(); await page.keyboard.insertText('偏好设置切换期间的未保存正文');
   prefs = await preferences(page);
   await prefs.locator('[data-section="editor"]').click();
+  const width = prefs.locator('#setting-width'), customWidth = prefs.locator('#setting-custom-width');
+  await expect(width).toHaveValue('0');
+  await expect(customWidth).toBeHidden();
+  await width.selectOption('760');
+  await expect(page.locator('#write')).toHaveCSS('max-width', '760px');
+  await width.selectOption('0');
+  await expect.poll(() => page.locator('#write').evaluate(el => el.style.maxWidth)).toBe('');
+  await expect(page.locator('#source-editor')).not.toHaveClass(/itypora-width/);
+  await width.selectOption('custom');
+  await expect(customWidth).toBeVisible();
+  await expect(customWidth).toBeFocused();
+  await expect(page.locator('#write')).toHaveCSS('max-width', '960px');
+  for (const invalid of ['', '499']) {
+    await customWidth.fill(invalid); await customWidth.press('Tab');
+    expect(await customWidth.evaluate(el => el.checkValidity())).toBe(false);
+    expect((await page.evaluate(() => window.desktop.preferencesCommand('get'))).settings.width).toBe('960');
+  }
+  for (const valid of ['500', '1801', '3200', '8192', '1048']) {
+    await customWidth.fill(valid); await customWidth.press('Enter');
+    await expect(page.locator('#write')).toHaveCSS('max-width', `${valid}px`);
+    await expect(page.locator('#source-editor')).toHaveCSS('--itypora-source-width', `${valid}px`);
+    await expect(width).toHaveValue('custom');
+    await expect(customWidth).toHaveValue(valid);
+  }
+  // Custom values survive reopening, and both presets and theme defaults remain usable.
+  await width.selectOption('960');
+  await expect(customWidth).toBeHidden();
+  await expect(page.locator('#write')).toHaveCSS('max-width', '960px');
+  await width.selectOption('custom');
+  await customWidth.fill('1048'); await customWidth.press('Tab');
+  await expect(page.locator('#write')).toHaveCSS('max-width', '1048px');
+  await prefs.locator('#close').click();
+  prefs = await preferences(page);
+  await prefs.locator('[data-section="editor"]').click();
+  await expect(width).toHaveValue('custom');
+  await expect(customWidth).toHaveValue('1048');
+  await page.screenshot({ path: 'test-results/preferences-custom-width.png' });
   await prefs.locator('#setting-mode').selectOption('wysiwyg');
   await expect(page.locator('.vditor-wysiwyg #write')).toContainText('未保存正文');
+  await expect(page.locator('#write')).toHaveCSS('max-width', '1048px');
   await expect(page.locator('#dirty-dot')).not.toHaveAttribute('hidden', '');
+  // Percentages are relative to the editor, respond to resizing and persist across modes.
+  await width.selectOption('percent');
+  await expect(customWidth).toHaveValue('80');
+  await expect(prefs.locator('#width-unit')).toHaveText('%');
+  await expect(page.locator('#write')).toHaveCSS('max-width', '80%');
+  for (const invalid of ['', '0', '101']) {
+    await customWidth.fill(invalid); await customWidth.press('Tab');
+    expect(await customWidth.evaluate(el => el.checkValidity())).toBe(false);
+    expect((await page.evaluate(() => window.desktop.preferencesCommand('get'))).settings.width).toBe('80%');
+  }
+  for (const valid of ['1', '100', '87.5']) {
+    await customWidth.fill(valid); await customWidth.press('Enter');
+    await expect(page.locator('#write')).toHaveCSS('max-width', `${valid}%`);
+    await expect(page.locator('#source-editor')).toHaveCSS('--itypora-source-width', `${valid}%`);
+  }
+  await page.screenshot({ path: 'test-results/preferences-percent-width.png' });
+  await prefs.locator('#close').click();
+  // Emulate viewport sizes so the 4K check also runs on smaller CI displays.
+  const viewportSession = await page.context().newCDPSession(page);
+  try {
+    for (const [width, height] of [[3840, 2160], [1440, 900], [1000, 800]]) {
+      await viewportSession.send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: false });
+      await expect.poll(() => widthRatio(page, '#write')).toBeCloseTo(0.875, 2);
+      if (width === 3840) expect((await page.locator('#write').boundingBox()).width).toBeGreaterThan(1800);
+    }
+  } finally {
+    await viewportSession.send('Emulation.clearDeviceMetricsOverride');
+    await viewportSession.detach();
+  }
+  await menu('sidebar');
+  await expect.poll(() => widthRatio(page, '#write')).toBeCloseTo(0.875, 2);
+  await menu('sidebar');
+  await menu('source');
+  await expect.poll(() => widthRatio(page, '#source-editor .CodeMirror-lines')).toBeCloseTo(0.875, 2);
+  await menu('source');
+  prefs = await preferences(page);
+  await prefs.locator('[data-section="editor"]').click();
+  await prefs.locator('#setting-mode').selectOption('ir');
+  await expect(page.locator('.vditor-ir #write')).toHaveCSS('max-width', '87.5%');
+  await width.selectOption('custom');
+  await expect(customWidth).toHaveValue('960');
+  await expect(prefs.locator('#width-unit')).toHaveText('px');
+  await expect(customWidth).not.toHaveAttribute('max', '100');
+  await expect(page.locator('#write')).toHaveCSS('max-width', '960px');
+  await width.selectOption('percent');
+  await customWidth.fill('87.5'); await customWidth.press('Enter');
+  await expect(page.locator('#write')).toHaveCSS('max-width', '87.5%');
+  await width.selectOption('0');
+  await expect(customWidth).toBeHidden();
+  await expect.poll(() => page.locator('#write').evaluate(el => el.style.maxWidth)).toBe('');
+  await expect(page.locator('#source-editor')).not.toHaveClass(/itypora-width/);
+  await width.selectOption('percent');
+  await customWidth.fill('87.5'); await customWidth.press('Enter');
+  await expect(page.locator('#write')).toHaveCSS('max-width', '87.5%');
   await prefs.locator('[data-section="appearance"]').click();
   await prefs.locator('[data-setting="showCount"]').uncheck();
   await expect(page.locator('#word-count')).toBeHidden();
@@ -82,6 +175,10 @@ try {
   await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(620, 600));
   expect(await page.locator('#preferences').evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
   expect(await page.locator('#preferences main').evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
+  await prefs.locator('[data-section="editor"]').click();
+  await expect(customWidth).toBeVisible();
+  expect(await page.locator('#preferences main').evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
+  await page.screenshot({ path: 'test-results/preferences-custom-width-narrow.png' });
   await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1000, 800));
   await prefs.locator('[data-section="appearance"]').click();
   await prefs.locator('#preferences main').evaluate(el => { el.scrollTop = 0; });
@@ -93,6 +190,7 @@ try {
   await expect(page.locator('#dirty-dot')).toBeVisible();
   // Opening preferences must preserve source selection, scrolling, and undo history.
   await menu('source');
+  await expect(page.locator('#source-editor .CodeMirror-lines')).toHaveCSS('max-width', '87.5%');
   const source = sourceEditor(page);
   const text = Array.from({ length: 100 }, (_, i) => `第 ${i + 1} 行正文`).join('\n');
   await source.fill(text);
@@ -120,8 +218,13 @@ try {
   await expect(page.locator('#preferences')).toHaveCSS('background-color', 'rgb(31, 35, 39)');
   await expect(page.locator('#write')).toHaveCSS('color', 'rgb(101, 44, 156)');
   await expect(page.locator('#word-count')).toBeHidden();
+  await prefs.locator('[data-section="editor"]').click();
+  await expect(prefs.locator('#setting-width')).toHaveValue('percent');
+  await expect(prefs.locator('#setting-custom-width')).toHaveValue('87.5');
+  await expect(prefs.locator('#width-unit')).toHaveText('%');
+  await expect(page.locator('#write')).toHaveCSS('max-width', '87.5%');
   expect(errors).toEqual([]);
-  console.log('PASS: directory theme selection, system appearance independence, menu synchronization, in-window preferences, unsaved text, custom CSS validation, directory reload, search and restart persistence');
+  console.log('PASS: directory theme selection, system appearance independence, menu synchronization, in-window preferences, uncapped pixel and responsive percentage widths, validation, unsaved text, custom CSS validation, directory reload, search and restart persistence');
 } finally {
   if (app) { await app.evaluate(({ dialog }) => { dialog.showMessageBox = async () => ({ response: 1 }); }).catch(() => {}); await app.close(); }
   const relative = path.relative(await fs.realpath(os.tmpdir()), await fs.realpath(temporary));

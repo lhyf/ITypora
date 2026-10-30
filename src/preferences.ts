@@ -16,7 +16,10 @@ host.innerHTML = `
       <article><h2>主题</h2><label class="row">当前主题<select id="current-theme" data-setting="theme" aria-label="当前主题"></select></label><p>从主题文件夹中选择已有主题。</p><div class="buttons"><button id="open-folder">打开主题文件夹</button><button id="get-themes">获取主题</button></div><div class="buttons secondary"><button id="import-theme">导入 CSS 主题…</button><button id="refresh-themes">重新加载主题</button></div><p id="theme-folder" class="path"></p><p>可将主题 CSS 和资源文件夹放入此目录，再点击“重新加载主题”。</p><p id="theme-errors" class="error" role="alert" hidden></p>
       <details><summary>自定义 CSS</summary><p>全局覆盖保存为 base.user.css；针对单个主题，可在主题文件夹添加“主题名.user.css”。</p><textarea id="custom-css" spellcheck="false" readonly aria-label="自定义 CSS" placeholder="#write {\n  /* 在这里调整正文样式 */\n}"></textarea><button id="save-css" disabled>保存并应用 CSS</button></details></article>
     </section>
-    <section data-page="editor" hidden><article><h2>编辑模式</h2><label class="row">默认模式<select id="setting-mode" data-setting="mode"><option value="ir">即时渲染</option><option value="wysiwyg">所见即所得</option></select></label><p>切换时保留当前文档内容。</p></article><article><h2>排版</h2><label class="row">正文宽度<select data-setting="width"><option value="0">跟随主题</option><option value="760">760 px</option><option value="960">960 px</option><option value="1200">1200 px</option></select></label>${checkbox('typewriter', '打字机模式')}${checkbox('spellcheck', '拼写检查')}</article></section>
+    <section data-page="editor" hidden><article><h2>编辑模式</h2><label class="row">默认模式<select id="setting-mode" data-setting="mode"><option value="ir">即时渲染</option><option value="wysiwyg">所见即所得</option></select></label><p>切换时保留当前文档内容。</p></article><article><h2>排版</h2>
+      <label class="row">正文宽度<select id="setting-width" data-setting="width"><option value="0">跟随主题</option><option value="760">760 px</option><option value="960">960 px</option><option value="1200">1200 px</option><option value="custom">自定义（px）</option><option value="percent">按比例（%）</option></select></label>
+      <div id="custom-width" hidden><label class="row">自定义宽度<div><input id="setting-custom-width" type="number" min="500" step="any" required aria-label="自定义正文宽度" aria-describedby="width-hint"/> <span id="width-unit">px</span></div></label><p id="width-hint"></p></div>
+      ${checkbox('typewriter', '打字机模式')}${checkbox('spellcheck', '拼写检查')}</article></section>
     <section data-page="markdown" hidden><article><h2>代码块</h2>${checkbox('codeLineNumbers', '显示代码行号')}<label class="row">Tab 缩进<select data-setting="tabSize"><option value="2">2 个空格</option><option value="4">4 个空格</option><option value="8">8 个空格</option></select></label></article><article><h2>渲染</h2>${checkbox('autoSpace', '自动调整中英文之间的显示间距')}<p>控制正文渲染，不会自动改写磁盘上的文件。</p></article></section>
     <p id="no-results" hidden>未找到匹配的设置。</p><footer><span id="message" role="status"></span></footer>
   </main></div>`;
@@ -36,7 +39,20 @@ function filter() {
   host.querySelectorAll<HTMLButtonElement>('[data-section]').forEach(button => { button.classList.toggle('selected', !query && button.dataset.section === section); button.setAttribute('aria-current', String(!query && button.dataset.section === section)); });
   $('#title').textContent = query ? '搜索结果' : categories.find(([id]) => id === section)![1]; $('#no-results').hidden = found;
 }
+function showCustomWidth(mode: string) {
+  const show = mode === 'custom' || mode === 'percent', percent = mode === 'percent';
+  $('#custom-width').hidden = !show;
+  const input = $<HTMLInputElement>('#setting-custom-width');
+  input.disabled = !show; input.min = percent ? '1' : '500'; input.max = percent ? '100' : '';
+  $('#width-unit').textContent = percent ? '%' : 'px';
+  $('#width-hint').textContent = percent ? '支持 1–100%，按编辑区可用宽度计算，随窗口和侧边栏自动调整。' : '最小 500 px，无上限；超出窗口宽度时自动收缩。';
+}
 function render(value: SettingsSnapshot) {
+  const widthSelect = $<HTMLSelectElement>('#setting-width'), widthInput = $<HTMLInputElement>('#setting-custom-width');
+  const percent = value.settings.width.endsWith('%');
+  const editingPixels = widthSelect.value === 'custom' && Number(widthInput.value) === Number(value.settings.width);
+  const presetWidth = Array.from(widthSelect.options).some(option => option.value === value.settings.width);
+  const widthMode = percent ? 'percent' : presetWidth && !editingPixels ? value.settings.width : 'custom';
   const themes = value.themes;
   const select = $<HTMLSelectElement>('#current-theme'); select.replaceChildren();
   for (const theme of themes) select.add(new Option(theme.name, theme.id));
@@ -52,6 +68,9 @@ function render(value: SettingsSnapshot) {
   $<HTMLInputElement>(`[name="font-size"][value="${automatic ? 'auto' : 'custom'}"]`).checked = true;
   $<HTMLInputElement>('#setting-size').disabled = automatic;
   $<HTMLInputElement>('#setting-size').value = automatic ? '16' : value.settings.size;
+  widthSelect.value = widthMode;
+  showCustomWidth(widthMode);
+  widthInput.value = percent ? value.settings.width.slice(0, -1) : value.settings.width === '0' ? '960' : value.settings.width;
   $('#theme-folder').textContent = value.themeFolder;
   $('#theme-errors').textContent = value.themeErrors.join('\n'); $('#theme-errors').hidden = !value.themeErrors.length;
 }
@@ -65,11 +84,23 @@ $('#search').addEventListener('input', filter);
 host.querySelectorAll<HTMLInputElement | HTMLSelectElement>('[data-setting]').forEach(input => input.addEventListener('change', () => void run(async () => {
   if (!input.checkValidity()) { input.reportValidity(); return; }
   const key = input.dataset.setting!;
+  if (key === 'width' && ['custom', 'percent'].includes(input.value)) {
+    const percent = input.value === 'percent', wasPercent = $('#width-unit').textContent === '%';
+    const width = $<HTMLInputElement>('#setting-custom-width');
+    if (percent !== wasPercent) width.value = percent ? '80' : '960';
+    showCustomWidth(input.value);
+    if (!width.checkValidity()) { width.reportValidity(); return; }
+    await save({ width: width.value + (percent ? '%' : '') });
+    width.focus(); width.select();
+    return;
+  }
   const value = input instanceof HTMLInputElement && input.type === 'checkbox' ? input.checked : ['readingSpeed', 'tabSize'].includes(key) ? Number(input.value) : input.value;
   await save({ [key]: value });
 })));
 host.querySelectorAll<HTMLInputElement>('[name="font-size"]').forEach(radio => radio.onchange = () => void run(() => save({ size: radio.value === 'auto' ? '0' : $<HTMLInputElement>('#setting-size').value })));
 $('#setting-size').addEventListener('change', () => void run(async () => { const input = $<HTMLInputElement>('#setting-size'); if (input.checkValidity()) await save({ size: input.value }); else input.reportValidity(); }));
+$('#setting-custom-width').addEventListener('change', () => void run(async () => { const input = $<HTMLInputElement>('#setting-custom-width'); if (input.checkValidity()) await save({ width: input.value + ($<HTMLSelectElement>('#setting-width').value === 'percent' ? '%' : '') }); else input.reportValidity(); }));
+$('#setting-custom-width').addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); $<HTMLInputElement>('#setting-custom-width').blur(); } });
 for (const [id, command] of [['open-folder', 'folder'], ['get-themes', 'gallery'], ['import-theme', 'import'], ['refresh-themes', 'refresh']]) {
   $(`#${id}`).onclick = () => void run(async () => { const result = await api.command(command); if (result?.settings) render(result); }, command === 'refresh' ? '主题已重新加载' : '');
 }

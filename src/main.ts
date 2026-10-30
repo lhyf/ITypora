@@ -232,19 +232,20 @@ function updatePreferences() {
   document.body.classList.toggle('typewriter-mode', preferences.typewriter);
   $('#word-count').hidden = !preferences.showCount;
   source.tabSize = preferences.tabSize;
+  const width = preferences.width.endsWith('%') ? preferences.width : Number(preferences.width) ? `${Number(preferences.width)}px` : '';
   const writing = document.querySelector<HTMLElement>('#write');
   if (writing) {
     writing.spellcheck = preferences.spellcheck;
     if (preferences.fontFamily) writing.style.setProperty('font-family', preferences.fontFamily, 'important'); else writing.style.removeProperty('font-family');
     if (Number(preferences.size)) writing.style.setProperty('font-size', `${Number(preferences.size)}px`, 'important'); else writing.style.removeProperty('font-size');
-    if (Number(preferences.width)) writing.style.setProperty('max-width', `${Number(preferences.width)}px`, 'important'); else writing.style.removeProperty('max-width');
+    if (width) writing.style.setProperty('max-width', width, 'important'); else writing.style.removeProperty('max-width');
   }
   // Source mode follows the same font and width preferences, as in Typora.
   const code = source.element.style;
   if (preferences.fontFamily) code.setProperty('font-family', preferences.fontFamily, 'important'); else code.removeProperty('font-family');
   if (Number(preferences.size)) code.setProperty('font-size', `${Number(preferences.size)}px`, 'important'); else code.removeProperty('font-size');
-  if (Number(preferences.width)) code.setProperty('--itypora-source-width', `${Number(preferences.width)}px`); else code.removeProperty('--itypora-source-width');
-  source.element.classList.toggle('itypora-width', Boolean(Number(preferences.width)));
+  if (width) code.setProperty('--itypora-source-width', width); else code.removeProperty('--itypora-source-width');
+  source.element.classList.toggle('itypora-width', Boolean(width));
   if (!source.hidden) source.cm.refresh();
 }
 

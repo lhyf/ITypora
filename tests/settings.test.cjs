@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const os = require('node:os');
-const { createSettingsStore } = require('../electron/settings.cjs');
+const { createSettingsStore, sanitize } = require('../electron/settings.cjs');
 
 async function temporary(t) {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'itypora-settings-'));
@@ -19,6 +19,19 @@ test('legacy themes migrate with stable IDs and preferences survive restart', as
   const restarted = await createSettingsStore(root).initialize();
   assert.equal(restarted.initialized, true); assert.equal(restarted.settings.theme, 'legacy-id');
   assert.ok(restarted.themes.some(theme => theme.id === 'legacy-id')); assert.equal(restarted.settings.size, '18'); assert.equal(restarted.settings.readingSpeed, 400); assert.equal(restarted.settings.unknown, undefined);
+});
+
+test('width settings accept large finite pixels and percentages, reject invalid values and survive restart', async t => {
+  for (const width of ['0', '760', '3200', '8192', '100000', '1%', '80%', '87.5%', '100%']) assert.equal(sanitize({ width }).width, width);
+  assert.equal(sanitize({ width: 3840 }).width, '3840');
+  assert.equal(sanitize({ width: '080.00%' }).width, '80%');
+  for (const width of ['', '499', -1, null, true, [], [960], {}, NaN, Infinity, 'Infinity', '0%', '0.5%', '101%', '-80%', '80%%', '80px', 'calc(100% - 1px)']) assert.deepEqual(sanitize({ width }), {});
+  const root = await temporary(t), store = createSettingsStore(root); await store.initialize();
+  for (const width of ['3200', '87.5%']) {
+    await store.saveSettings({ width });
+    const restarted = await createSettingsStore(root).initialize();
+    assert.equal(restarted.settings.width, width);
+  }
 });
 test('theme directory reload respects override order, errors and deletion', async t => {
   const root = await temporary(t), store = createSettingsStore(root); await store.initialize();
